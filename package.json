@@ -10,6 +10,8 @@
   "author": "shubham-bhati",
   "license": "ISC",
   "dependencies": {
+    "@google/genai": "^0.9.0",
+    "axios": "^1.8.4",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.5.0",
     "ejs": "^3.1.10",

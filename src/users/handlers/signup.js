@@ -36,23 +36,28 @@ const handleSignup = async ({
         });
 
         // Optionally, you can send a verification email here
+        // Generate a random verification code
+        const verificationcode = Math.floor(100000 + Math.random() * 900000).toString();
 
+        // Save the verification code to the user's record (assuming a verificationCode field exists)
+        await newUser.update({ verificationcode });
+
+        console.log(`Verification code for ${email}: ${verificationcode}`);
 
         sendEmail({
-            to: 'shubhambhati927@gmail.com',
-            subject: 'Welcome!',
-            template: 'exampleTemplate.ejs',
+            to: email,
+            subject: 'Thank you for signing up!',
+            template: 'verificationEmail.ejs',
             templateData: {
-                name: 'John Doe',
-                message: 'Thank you for signing up!',
-                subject: 'Welcome to our service!',
+                name: `${firstname} ${lastname}`,
+                verificationcode,
             },
         }).then((response) => {
             console.log(response);
         });
 
         // Generate JWT token
-        const token = jwt.sign({ id: newUser.id }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+        const token = jwt.sign({ id: newUser.id, isverified: false, email }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
 
         return { signUpError: false, token, message: 'User created successfully' };
     } catch (error) {

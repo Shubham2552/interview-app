@@ -1,10 +1,8 @@
-const express = require('express');
-const sendResponse = require('../utils/responseHandler');
-const handleSignup = require('../users/handlers/signup');
-const {  validateLogin } = require('../users/validation/signup');
-const router = express.Router();
+const sendResponse = require('../../../utils/responseHandler');
+const handleSignup = require('../../../users/handlers/signup');
+const {  validateSignUp } = require('../../../users/validation/signup');
 
-router.post('/signup', async (req, res, next) => {
+const signUpHandler =  async (req, res, next) => {
     try {
         const { 
             firstname,
@@ -31,6 +29,6 @@ router.post('/signup', async (req, res, next) => {
     } catch (error) {
         next(error); // Pass the error to the global error handler
     }
-});
+};
 
-module.exports = { path: '/users', router, middleware: [validateLogin] };
+module.exports = { path: '/signup',method: 'post', handler: signUpHandler, middleware: [validateSignUp] };

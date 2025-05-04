@@ -1,7 +1,7 @@
 const Joi = require('joi');
 const sendResponse = require('../../utils/responseHandler');
 
-const loginSchema = Joi.object({
+const signUpSchema = Joi.object({
     firstname: Joi.string().required().messages({
         'string.base': 'Firstname must be a string',
         'any.required': 'Firstname is required',
@@ -28,14 +28,14 @@ const loginSchema = Joi.object({
     }),
 });
 
-const validateLogin = (req, res, next) => {
-    const { error } = loginSchema.validate(req.body, { abortEarly: false });
+const validateSignUp = (req, res, next) => {
+    const { error } = signUpSchema.validate(req.body, { abortEarly: false });
     if (error) {
-        return sendResponse(res, 400, { errors: error.details.map(err => err.message) });
+        return sendResponse(res, 400,false, null,  { errors: error.details.map(err => err.message) });
     }
     next();
 };
 
 module.exports = {
-    validateLogin,
+    validateSignUp,
 };

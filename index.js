@@ -27,8 +27,8 @@ app.listen(port, () => {
     sequelize.authenticate()
         .then(() => {
             console.log('Database connection has been established successfully.');
-            sequelize.sync({ force: false }).then(() => {
-                console.log('Database synchronized successfully.');
+            sequelize.sync({ alter: true }).then(() => {
+                console.log('Database synchronized successfully with alter:true.');
             }).catch(err => {
                 console.error('Error synchronizing the database:', err);
             });
