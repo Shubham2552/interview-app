@@ -1,0 +1,18 @@
+module.exports = {
+    'USER_CREATED': 'User created successfully',
+    'EMAIL_ALREADY_EXISTS': 'Email already exists',
+    'LOGIN_SUCCESSFUL': 'Login successful!',
+    'PASSWORD_CHANGED_SUCCESSFULLY': 'Password changed successfully',
+    'GET_USER_PROFILE': 'User profile fetched successfully',
+    'EMAIL_VERIFICATION_CODE_RESEND_SUCCESSFULLY': 'Email verification code resent successfully',
+    'PROFILE_UPDATED_SUCCESSFULLY': 'Profile updated successfully',
+    'USER_VERIFIED_SUCCESSFULLY': 'User verified successfully',
+    'USER_LOGGED_OUT_SUCCESSFULLY': 'User logged out successfully',
+    'PASSWORD_RESET_LINK_SENT': 'Password reset link sent to your email',
+    'PASSWORD_RESET_SUCCESSFUL': 'Password reset successful',
+    'EMAIL_VERIFICATION_SUCCESSFUL': 'Email verification successful',
+    'EMAIL_VERIFICATION_CODE_RESENT': 'Email Verification Code Resend Successfully',
+    'LOGOUT_SUCCESSFUL': 'Logged out successfully.',
+    'SEND_FORGOT_PASSWORD_EMAIL_SUCCESS': 'Forgot password email sent successfully',
+    'RESET_PASSWORD_SUCCESS': 'Password reset successfully',
+}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eaf1fb;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 60, 136, 0.08);
+            overflow: hidden;
+        }
+        .email-header {
+            background-color: #1976d2;
+            color: #ffffff;
+            text-align: center;
+            padding: 24px 20px;
+        }
+        .email-body {
+            padding: 24px 20px;
+            color: #222b45;
+            line-height: 1.7;
+        }
+        .verification-code {
+            display: inline-block;
+            background-color: #e3f0fd;
+            color: #1976d2;
+            font-weight: bold;
+            padding: 12px 28px;
+            border: 1.5px solid #1976d2;
+            border-radius: 6px;
+            margin: 24px 0;
+            font-size: 20px;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+        .email-footer {
+            text-align: center;
+            padding: 14px;
+            font-size: 13px;
+            color: #6b7a99;
+            background-color: #eaf1fb;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1>Welcome to Our Platform, <%= name %>!</h1>
+        </div>
+        <div class="email-body">
+            <p>Thank you for signing up! We're excited to have you on board.</p>
+            <p>Please use the verification code below to complete your registration:</p>
+            <div class="verification-code">
+                <%= verificationCode %>
+            </div>
+            <p>If you did not sign up for this account, please ignore this email.</p>
+        </div>
+        <div class="email-footer">
+            <p>&copy; 2024 Our Platform. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
