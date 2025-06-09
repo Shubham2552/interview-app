@@ -1,0 +1,15 @@
+{
+  "tech": "Node.js",
+  "topic": "Async Patterns",
+  "difficulty": 7,
+  "duration": 30,
+  "previousQuestions": [
+    "Explain the difference between `process.nextTick()` and `setImmediate()` in Node.js.  When would you use one over the other?",
+    "Describe the event loop in Node.js. How does it handle asynchronous operations?",
+    "What are streams in Node.js and what are the different types of streams? Give a practical example of when you would use a stream.",
+    "How do you handle errors in asynchronous code in Node.js, specifically with Promises and async/await?",
+    "Explain how middleware works in Express.js. Describe a scenario where you would create custom middleware.",
+    "What are the advantages and disadvantages of using a microservices architecture? How would you approach designing a microservice in Node.js?",
+    "Explain how you would use environment variables in a Node.js application, and why they are important."
+  ]
+}

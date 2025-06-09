@@ -15,4 +15,6 @@ module.exports = {
     'LOGOUT_SUCCESSFUL': 'Logged out successfully.',
     'SEND_FORGOT_PASSWORD_EMAIL_SUCCESS': 'Forgot password email sent successfully',
     'RESET_PASSWORD_SUCCESS': 'Password reset successfully',
+    'ADDED_TO_WAITLIST_SUCCESSFUL': 'Successfully added to waitlist',
+    'WAITLIST': 'Waitlist mail sending successful'
 }

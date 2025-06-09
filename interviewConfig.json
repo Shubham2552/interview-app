@@ -1,0 +1,5 @@
+{
+  "className": "NodeJsInterview",
+  "propertyKeys": ["tech", "topic", "difficulty", "duration"],
+  "promptTemplate": "Here is a list of Node.js interview questions that have already been asked:\n{{previousQuestions}}\n\nPlease generate a new {{tech}} interview for a {{duration}} minute interview, topic: {{topic}}, difficulty {{difficulty}} out of 10, that is different from all the questions above.\nReturn the interview as a JSON array of questions only (no explanations, no code blocks, no extra text)."
+}

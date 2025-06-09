@@ -22,6 +22,8 @@ exports.EMAIL_TEMPLATES = {
         SIGNUP: 'signup',
         RESEND: 'resend',
         RESET_PASSWORD: 'reset_password',
+        WAITLIST: 'waitlist',
+        PRE_REGISTRATION_SURVEY: 'pre_registration_survey'
     },
     signup: {
         templateName: 'verificationEmail.ejs',
@@ -35,4 +37,12 @@ exports.EMAIL_TEMPLATES = {
         templateName: 'resetPasswordEmail.ejs',
         subject: 'Reset Your Password',
     },
+    waitlist: {
+        templateName: 'waitlistEmail.ejs',
+        subject: 'Thank You! You have successfully Pre-Registered'
+    },
+    pre_registration_survey: {
+        templateName: 'preRegistrationSurvey.ejs',
+        subject: 'Thanks! You request has a special place.'
+    }
 }

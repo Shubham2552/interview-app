@@ -12,4 +12,8 @@ module.exports = {
     'FORGOT_PASSWORD_SEND_EMAIL_ERROR': 'Error sending forgot password email',
     'OLD_NEW_PASSWORD_SAME': 'Old and new password cannot be the same',
     'CONFIRM_PASSWORD_MISMATCH': 'Confirm password does not match new password',
+    'ALREADY_ON_WAITLIST': 'You are already on waitlist',
+    'ADDED_TO_WAITLIST_FAILED': 'Failed to register for waitlist',
+    'WAITLIST': 'Waitlist mail sending failed'
+
 }

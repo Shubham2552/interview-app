@@ -36,11 +36,15 @@ const sequelize = new Sequelize(
 // Import models
 const User = require('./sequelizeSchemas/user');
 const UserToken = require('./sequelizeSchemas/userTokens');
+const PreRegisterUser = require('./sequelizeSchemas/preRegisterUser');
+const PreRegisterPersonalization = require('./sequelizeSchemas/preRegisterPersonalization');
 
 // Initialize models
 const models = {
     User: User(sequelize),
-    UserToken: UserToken(sequelize)
+    UserToken: UserToken(sequelize),
+    PreRegisterUser: PreRegisterUser(sequelize),
+    PreRegisterPersonalization: PreRegisterPersonalization(sequelize)
 };
 
 // Set up associations
@@ -50,6 +54,17 @@ models.User.hasMany(models.UserToken, {
 });
 
 models.UserToken.belongsTo(models.User, {
+    foreignKey: 'userId',
+    as: 'user'
+});
+
+// Pre-register associations
+models.PreRegisterUser.hasOne(models.PreRegisterPersonalization, {
+    foreignKey: 'userId',
+    as: 'personalization'
+});
+
+models.PreRegisterPersonalization.belongsTo(models.PreRegisterUser, {
     foreignKey: 'userId',
     as: 'user'
 });

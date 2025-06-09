@@ -9,6 +9,8 @@ module.exports = [
     ['FORGOT_PASSWORD', '/forgot-password', 'get'],
     ['RESET_PASSWORD', '/reset-password', 'post'],
     ['LOGOUT', '/logout', 'get'],
+    ['WAITLIST', '/waitlist', 'get'],
+    ['SURVEY', '/survey', 'post'],
 ].reduce((acc, ele) => {
     acc[ele[0]] = {
         path: ele[1],
