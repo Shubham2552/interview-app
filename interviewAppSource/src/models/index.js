@@ -1,13 +1,16 @@
+const dotenv = require('dotenv');
+dotenv.config();
 const { Sequelize } = require('sequelize');
 const logger = require('../utils/logger');
 
 // Database configuration
 const config = {
-    database: process.env.POSTGRES_DB || 'verbalpilot',
-    username: process.env.POSTGRES_USER || 'postgres',
-    password: process.env.POSTGRES_PASSWORD || 'postgres',
-    host: process.env.POSTGRES_HOST || 'localhost',
-    dialect: process.env.POSTGRES_DIALECT || 'postgres',
+    database: process.env.POSTGRES_DB,
+    username: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    host: process.env.POSTGRES_HOST,
+    dialect: process.env.POSTGRES_DIALECT,
+
     logging: (msg) => logger.debug(msg),
     pool: {
         max: 5,

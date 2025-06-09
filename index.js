@@ -1,7 +1,8 @@
+const dotenv = require('dotenv');
+dotenv.config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const dotenv = require('dotenv');
 const requestIp = require('request-ip');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -13,7 +14,6 @@ const scanAndMountRoutes = require('./interviewAppSource/src/utils/routeScanner'
 const sendResponse = require('./interviewAppSource/src/utils/responseHandler');
 const logger = require('./interviewAppSource/src/utils/logger');
 
-dotenv.config();
 require('module-alias/register');
 
 const app = express();
