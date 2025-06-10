@@ -27,14 +27,6 @@
             color: #222b45;
             line-height: 1.7;
         }
-        .personal-details {
-            background: #e3f0fd;
-            border-radius: 6px;
-            padding: 16px;
-            margin: 18px 0;
-            color: #1976d2;
-            font-size: 15px;
-        }
         .email-footer {
             text-align: center;
             padding: 14px;
@@ -47,19 +39,13 @@
 <body>
     <div class="email-container">
         <div class="email-header">
-            <h1>Thank You for Sharing Your Details</h1>
+            <h1>Thank You for Your Feedback!</h1>
         </div>
         <div class="email-body">
-            <p>We’ve received your personalized information and will use it to tailor your experience on our platform.</p>
-            <div class="personal-details">
-                <p><strong>Email:</strong> <%= email %></p>
-                <% if (typeof details === 'object') { %>
-                    <% Object.keys(details).forEach(function(key) { %>
-                        <p><strong><%= key.charAt(0).toUpperCase() + key.slice(1) %>:</strong> <%= details[key] %></p>
-                    <% }); %>
-                <% } %>
-            </div>
-            <p>If you have any questions or want to update your information, just reply to this email.</p>
+            <p>Thank you for taking the time to fill out our form and share your valuable suggestions with us.</p>
+            <p>Your input helps us improve and create a better experience for everyone.</p>
+            <p>If you have any more ideas or questions, feel free to reply to this email at any time.</p>
+            <p>We truly appreciate your support!</p>
         </div>
         <div class="email-footer">
             <p>&copy; 2025 Our Platform. All rights reserved.</p>

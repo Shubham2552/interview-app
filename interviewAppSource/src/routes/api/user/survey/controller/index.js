@@ -1,71 +1,49 @@
-const { PreRegisterUser, PreRegisterPersonalization } = require('../../../../../models');
+const { PreRegisterPersonalization } = require('../../../../../models');
 const logger = require('../../../../../utils/logger');
+const { responseMessages, EMAIL_TEMPLATES } = require('../../../../../constant/genericConstants/commonConstant');
+const { sendGenericEmail } = require('../../../../../commonServices/users/genericEmailSender');
 
 const handleSurvey = async ({ surveyEmail, roles, jobHunting, challenges, willPay, featureSuggestion, ipAddress, deviceInfo }) => {
     try {
-
-        // Find or create pre-register user
-        let [user, created] = await PreRegisterUser.findOrCreate({
-            where: { email: surveyEmail },
-            defaults: { 
-                status: 'SURVEY_COMPLETED',
-                ipAddress,
-                deviceInfo: JSON.stringify(deviceInfo),
-                lastActivityAt: new Date()
-            }
-        });
-
-        if (!created) {
-            // Update existing user's status and info
-            await user.update({ 
-                status: 'SURVEY_COMPLETED',
-                ipAddress,
-                deviceInfo: JSON.stringify(deviceInfo),
-                lastActivityAt: new Date()
-            });
-        }
-
-        // Create or update personalization
-        const [personalization, wasCreated] = await PreRegisterPersonalization.findOrCreate({
-            where: { userId: user.id },
-            defaults: {
-                roles,
-                jobHunting,
-                challenges,
-                willPay,
-                featureSuggestion,
-                lastUpdatedAt: new Date()
-            }
-        });
-
-        if (!wasCreated) {
-            // Update existing personalization with timestamp
-            await personalization.update({
-                roles,
-                jobHunting,
-                challenges,
-                willPay,
-                featureSuggestion,
-                lastUpdatedAt: new Date()
-            });
-        }
-
-        logger.info('Survey submitted successfully', { 
+        const personalization = await PreRegisterPersonalization.create({
             email: surveyEmail,
-            userId: user.id,
-            isNewUser: created,
-            isNewPersonalization: wasCreated,
+            roles,
+            jobHunting,
+            challenges,
+            willPay,
+            featureSuggestion,
+            deviceInfo,
+            ipAddress
+        });
+
+        logger.info('Survey personalization entry created', {
+            email: surveyEmail,
+            personalizationId: personalization.id,
             ipAddress,
             deviceInfo
         });
 
+        const preRegistrationSurveryMailResponse = await sendGenericEmail({
+            type: EMAIL_TEMPLATES.keys.PRE_REGISTRATION_SURVEY,
+            to: surveyEmail,
+            templateData: null
+        });
+
+        if (preRegistrationSurveryMailResponse.Error) {
+            logger.error('Failed to send waitlist thank you email', {
+                surveyEmail,
+                userId: personalization.id,
+                error: preRegistrationSurveryMailResponse.message
+            });
+        }
+
+
         return {
-            error: false,
-            message: 'Survey submitted successfully',
+            Error: false,
+            message: responseMessages.SUCCESS_CONSTANTS.SURVEY_SUBMITTED_SUCCESSFULLY,
             data: {
-                userId: user.id,
-                isNewSubmission: wasCreated,
-                submittedAt: personalization.lastUpdatedAt
+                personalizationId: personalization.id,
+                submittedAt: personalization.createdAt
             }
         };
 
@@ -75,13 +53,13 @@ const handleSurvey = async ({ surveyEmail, roles, jobHunting, challenges, willPa
             stack: error.stack,
             email: surveyEmail
         });
-        
+
         return {
-            error: true,
-            message: 'Failed to submit survey',
+            Error: true,
+            message: responseMessages.ERROR_CONSTANTS.SURVEY_SUBMIT_FAILED,
             data: null
         };
     }
 };
 
-module.exports = handleSurvey; 
+module.exports = handleSurvey;

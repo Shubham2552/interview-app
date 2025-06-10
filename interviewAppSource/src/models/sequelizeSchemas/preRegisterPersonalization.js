@@ -11,7 +11,6 @@ module.exports = (sequelize) => {
         email: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
             validate: {
                 isEmail: true
             }
@@ -35,6 +34,19 @@ module.exports = (sequelize) => {
         featureSuggestion: {
             type: DataTypes.TEXT,
             allowNull: true
+        },
+        deviceInfo: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            comment: 'Optional: device or browser info'
+        },
+        ipAddress: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            validate: {
+                isIP: true
+            },
+            comment: 'Optional: IP address'
         },
         createdAt: {
             type: DataTypes.DATE,

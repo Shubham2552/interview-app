@@ -9,30 +9,24 @@ const surveySchema = Joi.object({
             'string.email': 'Please provide a valid email address',
             'any.required': 'Email is required'
         }),
-    roles: Joi.array()
-        .items(Joi.string())
-        .min(1)
+    roles: Joi.string()
         .required()
         .messages({
-            'array.min': 'Please select at least one role',
             'any.required': 'Roles selection is required'
         }),
     jobHunting: Joi.string()
-        .valid('ACTIVE', 'PASSIVE', 'NOT_LOOKING')
         .required()
         .messages({
             'any.only': 'Invalid job hunting status',
             'any.required': 'Job hunting status is required'
         }),
-    challenges: Joi.array()
-        .items(Joi.string())
-        .min(1)
+    challenges: Joi.string()
         .required()
         .messages({
             'array.min': 'Please select at least one challenge',
             'any.required': 'Challenges selection is required'
         }),
-    willPay: Joi.boolean()
+    willPay: Joi.string()
         .required()
         .messages({
             'any.required': 'Payment willingness indication is required'

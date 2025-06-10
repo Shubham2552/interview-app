@@ -16,5 +16,9 @@ module.exports = {
     'SEND_FORGOT_PASSWORD_EMAIL_SUCCESS': 'Forgot password email sent successfully',
     'RESET_PASSWORD_SUCCESS': 'Password reset successfully',
     'ADDED_TO_WAITLIST_SUCCESSFUL': 'Successfully added to waitlist',
-    'WAITLIST': 'Waitlist mail sending successful'
+    'WAITLIST': 'Waitlist mail sending successful',
+    'SURVEY_SUBMITTED_SUCCESSFULLY': 'Survey submitted successfully',
+    'WAITLIST_SEND_EMAIL_SUCCESS': 'Waitlist thank you email sent successfully.',
+    'PRE_REGISTRATION_SURVEY_SEND_EMAIL_SUCCESS': 'Pre-registration survey email sent successfully.',
+
 }

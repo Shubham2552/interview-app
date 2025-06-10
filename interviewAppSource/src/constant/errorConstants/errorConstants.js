@@ -14,6 +14,9 @@ module.exports = {
     'CONFIRM_PASSWORD_MISMATCH': 'Confirm password does not match new password',
     'ALREADY_ON_WAITLIST': 'You are already on waitlist',
     'ADDED_TO_WAITLIST_FAILED': 'Failed to register for waitlist',
-    'WAITLIST': 'Waitlist mail sending failed'
+    'WAITLIST': 'Waitlist mail sending failed',
+    'SURVEY_SUBMIT_FAILED': 'Failed to submit survey',
+    'WAITLIST_SEND_EMAIL_ERROR': 'Failed to send waitlist thank you email.',
+    'PRE_REGISTRATION_SURVEY_SEND_EMAIL_ERROR': 'Failed to send pre-registration survey email.',
 
 }
