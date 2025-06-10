@@ -22,6 +22,7 @@ const port = process.env.PORT || 3000;
 // Security middleware
 app.use(helmet());
 app.use(compression());
+app.set('trust proxy', true);
 
 // Rate limiting
 const limiter = rateLimit({
