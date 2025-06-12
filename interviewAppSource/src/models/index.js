@@ -20,8 +20,6 @@ const config = {
     }
 };
 
-console.log("Database Config:", config);
-
 // Create Sequelize instance
 const sequelize = new Sequelize(
     config.database,
