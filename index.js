@@ -9,10 +9,10 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
 
-const { initializeDatabase } = require('./interviewAppSource/src/models');
-const scanAndMountRoutes = require('./interviewAppSource/src/utils/routeScanner');
-const sendResponse = require('./interviewAppSource/src/utils/responseHandler');
-const logger = require('./interviewAppSource/src/utils/logger');
+const { initializeDatabases } = require('./verbalPilotCore/models');
+const scanAndMountRoutes = require('./verbalPilotCore/src/utils/routeScanner');
+const sendResponse = require('./verbalPilotCore/src/utils/responseHandler');
+const logger = require('./verbalPilotCore/src/utils/logger');
 
 require('module-alias/register');
 
@@ -54,7 +54,7 @@ app.get('/health', (req, res) => {
 });
 
 // Dynamically scan and mount routes
-const routesDir = path.join(__dirname, 'interviewAppSource', 'src', 'routes');
+const routesDir = path.join(__dirname, 'verbalPilotCore', 'src', 'routes');
 scanAndMountRoutes(app, routesDir);
 
 // 404 handler
@@ -83,7 +83,7 @@ app.use((err, req, res, next) => {
 // Database connection with retry mechanism
 const connectWithRetry = async (retries = 5, delay = 5000) => {
     try {
-        await initializeDatabase();
+        await initializeDatabases();
         logger.info('Database initialized successfully');
     } catch (err) {
         logger.error('Database initialization failed:', err);

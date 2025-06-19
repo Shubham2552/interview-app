@@ -1,0 +1,6 @@
+{
+    "_ParentClass": "QueryEngineCore",
+    "_ClassName" : "QE1",
+    "_ClassDisplayName": "Query Engine 1",
+    "_Keys": ["tech", "topic", "difficulty"]
+}

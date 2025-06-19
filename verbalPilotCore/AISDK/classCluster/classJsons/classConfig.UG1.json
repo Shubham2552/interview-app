@@ -1,0 +1,10 @@
+{
+  "_ParentClass": "UserGroupCore",
+  "_ClassName": "UG1",
+  "_Keys": ["groupId", "groupName", "userIds"],
+  "_Methods": {
+    "ADD_USER_TO_GROUP": "addUserToGroup",
+    "REMOVE_USER_FROM_GROUP": "removeUserFromGroup"
+  },
+  "_FilePath": "./userGroupMethods.js"
+}
