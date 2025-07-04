@@ -1,10 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const logger = require('./logger');
+const authMiddleware = require('./authMiddleware');
 
 /**
  * Scans a directory for route folders and mounts their index.js on the provided Express app.
- * Each route folder must have an index.js exporting { path, handler, method, middleware? }.
+ * Each route folder must have an index.js exporting { path, handler, method, middleware?, auth? }.
  *
  * @param {Object} app - The Express app instance.
  * @param {string} routesDir - The directory containing route folders.
@@ -14,10 +15,8 @@ const scanAndMountRoutes = (app, routesDir) => {
         fs.readdirSync(dir).forEach((entry) => {
             const entryPath = path.join(dir, entry);
             if (fs.statSync(entryPath).isDirectory()) {
-                // Check for index.js in this folder
                 const indexFile = path.join(entryPath, 'index.js');
                 if (fs.existsSync(indexFile)) {
-                    // Build route path: use accumulatedPath only (skip current folder)
                     const routePath = accumulatedPath.replace(/\\/g, '/');
                     const route = require(indexFile);
 
@@ -38,15 +37,24 @@ const scanAndMountRoutes = (app, routesDir) => {
                             return;
                         }
 
+                        // Compose middleware array
+                        let middlewares = [];
+                        if (route.auth === true) {
+                            middlewares.push(authMiddleware);
+                        }
+                        if (Array.isArray(route.middleware) && route.middleware.length > 0) {
+                            middlewares = middlewares.concat(route.middleware);
+                        }
+
                         if (typeof app[method] === 'function') {
-                            if (Array.isArray(route.middleware) && route.middleware.length > 0) {
-                                app[method](fullRoutePath, ...route.middleware, route.handler);
+                            if (middlewares.length > 0) {
+                                app[method](fullRoutePath, ...middlewares, route.handler);
                             } else {
                                 app[method](fullRoutePath, route.handler);
                             }
                             logger.info('Route mounted successfully', {
                                 ...context,
-                                hasMiddleware: Array.isArray(route.middleware) && route.middleware.length > 0
+                                hasMiddleware: middlewares.length > 0
                             });
                         } else {
                             logger.error('Invalid route method', {
@@ -56,7 +64,6 @@ const scanAndMountRoutes = (app, routesDir) => {
                         }
                     }
                 }
-                // Recursively scan subfolders, now add current folder to accumulatedPath
                 scanDirectory(entryPath, path.join(accumulatedPath, entry));
             }
         });

@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const sendResponse = require('../utils/responseHandler'); // Adjust the path as needed
-const { UserToken } = require('../../models'); // Adjust the path as needed
+const { UserTokens } = require('../../models'); // Adjust the path as needed
 const logger = require('./logger');
 /**
  * Middleware to authenticate requests using JWT.
@@ -34,7 +34,7 @@ const authMiddleware = async (req, res, next) => {
         context.userId = decoded.id;
         context.email = decoded.email;
 
-        const tokenData = await UserToken.findOne({
+        const tokenData = await UserTokens.findOne({
             where: {
                 token: token,
                 userId: decoded.id,

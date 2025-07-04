@@ -66,14 +66,7 @@ module.exports = (sequelize) => {
             defaultValue: DataTypes.NOW,
         },
     }, {
-        tableName: 'users',
         timestamps: true,
-        indexes: [
-            {
-                unique: true,
-                fields: ['email']
-            }
-        ]
     });
 
     return User;

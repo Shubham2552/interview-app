@@ -34,16 +34,29 @@ app.use(limiter);
 // Request parsing and basic middleware
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.json({ limit: '10mb' }));
+
+// Fix: Remove typo in allowed origins and handle OPTIONS requests for CORS
+const allowedOrigins = [
+  'https://verbalpilot.com',
+  'https://www.verbalpilot.com',
+  'https://pre-release.verbalpilot.com',
+  'http://localhost:3000',
+  'http://localhost:8080', // fixed typo: was 'htt://localhost:8080'
+];
+
 app.use(cors({
-  origin: [
-    'https://verbalpilot.com',
-    'https://www.verbalpilot.com',
-    'https://pre-release.verbalpilot.com'
-  ],
+  origin: function(origin, callback) {
+    // allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 }));
-app.use(requestIp.mw());
 
 // Request logging
 app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));

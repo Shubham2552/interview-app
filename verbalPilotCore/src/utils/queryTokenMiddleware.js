@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const sendResponse = require('./responseHandler'); // Adjust the path as needed
-const { UserToken, User } = require('../../models/index'); // Adjust the path as needed
+const { UserTokens, User } = require('../../models/index'); // Adjust the path as needed
 const { responseMessages } = require('../constant/genericConstants/commonConstant');
 const logger = require('./logger');
 /**
@@ -34,7 +34,7 @@ const queryTokenMiddlware = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         context.userId = decoded.id;
 
-        const tokenData = await UserToken.findOne({
+        const tokenData = await s.findOne({
             where: {
                 token: token,
                 userId: decoded.id,

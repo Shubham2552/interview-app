@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const path = require('path');
-const { User, UserToken } = require('../../../../../../models');
+const { User, UserTokens } = require('../../../../../../models');
 const { JWT_EXPIRY } = process.env;
 const { responseMessages, tokenType } = require('../../../../../constant/genericConstants/commonConstant');
 const logger = require('../../../../../utils/logger');
@@ -59,7 +59,7 @@ const handleLogin = async ({email, password, deviceInfo, ipAddress}) => {
         const expiryDate = new Date();
         expiryDate.setSeconds(expiryDate.getSeconds() + expirySeconds);
 
-        await UserToken.create({
+        await UserTokens.create({
             userId: existingUser.id,
             token,
             jwtExpiry: expiryDate,

@@ -1,9 +1,10 @@
 const bcrypt = require('bcrypt');
 const { updatePassword } = require('../../../../../commonServices/users/updatePassword');
-const { User, UserToken } = require('../../../../../../models');
+const { User, UserTokens } = require('../../../../../../models');
 const { responseMessages } = require('../../../../../constant/genericConstants/commonConstant');
 const logger = require('../../../../../utils/logger');
 const { logError } = require('../../../../../utils/errorLogger');
+const userTokens = require('../../../../../../models/sequelizeSchemas/userTokens');
 
 /*
     Actions
@@ -41,7 +42,7 @@ const handleChangePassword = async ({ userId, oldPassword, newPassword }) => {
         await updatePassword(user, newPassword);
         logger.info('Password updated successfully', { ...context });
     
-        await UserToken.update(
+        await userTokens.update(
             { isRevoked: true },
             { where: { userId: user.id, isRevoked: false } }
         );

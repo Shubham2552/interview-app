@@ -58,13 +58,6 @@ module.exports = (sequelize) => {
             allowNull: false,
             defaultValue: DataTypes.NOW
         }
-    }, {
-        tableName: 'pre_register_personalizations',
-        indexes: [
-            {
-                fields: ['userId']
-            }
-        ]
     });
 
     return PreRegisterPersonalization;

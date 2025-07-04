@@ -11,10 +11,6 @@ module.exports = (sequelize) => {
         userId: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            references: {
-                model: 'users',
-                key: 'id'
-            }
         },
         token: {
             type: DataTypes.STRING,
@@ -33,9 +29,6 @@ module.exports = (sequelize) => {
         ipAddress: {
             type: DataTypes.STRING,
             allowNull: true,
-            validate: {
-                isIP: true
-            },
             comment: 'Optional: IP address'
         },
         tokenType: {
@@ -48,20 +41,7 @@ module.exports = (sequelize) => {
             defaultValue: false
         }
     }, {
-        tableName: 'user_tokens',
         timestamps: true,
-        indexes: [
-            {
-                fields: ['userId']
-            },
-            {
-                fields: ['token'],
-                unique: true
-            },
-            {
-                fields: ['userId', 'tokenType', 'isRevoked']
-            }
-        ]
     });
 
     return UserToken;

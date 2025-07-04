@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { JWT_EXPIRY, FRONTEND_URL } = process.env;
-const { User, UserToken } = require('../../../../../../models');
+const { User, UserTokens } = require('../../../../../../models');
 const { responseMessages, tokenType, EMAIL_TEMPLATES } = require('../../../../../constant/genericConstants/commonConstant');
 const { sendForgotPasswordEmail } = require('../../../../../commonServices/users/forgotPasswordEmail');
 const logger = require('../../../../../utils/logger');
@@ -30,7 +30,7 @@ const handleForgotPassword = async ({email, ipAddress, deviceInfo}) => {
         logger.info('Reset token generated', { ...context });
 
         // Put this token in the usertokens table
-        await UserToken.create({
+        await UserTokens.create({
             userId: user.id,
             token: resetToken,
             jwtExpiry: new Date(Date.now() + (jwt.decode(resetToken).exp - jwt.decode(resetToken).iat) * 1000), // Calculate expiry from token

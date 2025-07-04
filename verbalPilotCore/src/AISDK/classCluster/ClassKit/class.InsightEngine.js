@@ -1,6 +1,5 @@
 class InsightEngineCore {
-    constructor(config = {}) {
-        this.config = config;
+    constructor() {
     }
 
     async analyzeResponse(params) {

@@ -1,6 +1,6 @@
 const brypt = require('bcrypt');
 const { SALT_ROUNDS } = process.env;
-const { User, UserToken } = require('../../../../../../models');
+const { User, UserTokens } = require('../../../../../../models');
 const { responseMessages } = require('../../../../../constant/genericConstants/commonConstant');
 const logger = require('../../../../../utils/logger');
 const { logError } = require('../../../../../utils/errorLogger');
@@ -38,7 +38,7 @@ const handleResetPassword = async (id, newPassword) => {
         await User.update({ password: hashedPassword }, { where: { id } });
         logger.info('Password updated successfully', { ...context });
 
-        await UserToken.update({ isRevoked: true }, { where: { userId: id, isRevoked: false } });
+        await UserTokens.update({ isRevoked: true }, { where: { userId: id, isRevoked: false } });
         logger.info('All existing tokens revoked', { ...context });
 
         return { Error: false, message: responseMessages.SUCCESS_CONSTANTS.RESET_PASSWORD_SUCCESS };

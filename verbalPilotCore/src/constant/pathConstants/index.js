@@ -11,6 +11,7 @@ module.exports = [
     ['LOGOUT', '/logout', 'get'],
     ['WAITLIST', '/waitlist', 'get'],
     ['SURVEY', '/survey', 'post'],
+    ['GET_AVAILAIBLE_INTERVIEWS', '/available-interviews', 'get'],
 ].reduce((acc, ele) => {
     acc[ele[0]] = {
         path: ele[1],

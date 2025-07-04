@@ -1,4 +1,4 @@
-const { UserToken } = require('../../../../../../models');
+const { UserTokens } = require('../../../../../../models');
 const { responseMessages } = require('../../../../../constant/genericConstants/commonConstant');
 const logger = require('../../../../../utils/logger');
 const { logError } = require('../../../../../utils/errorLogger');
@@ -14,7 +14,7 @@ const handleLogout = async ({ token, userId }) => {
             return { Error: true, message: responseMessages.ERROR_CONSTANTS.NO_TOKEN_PROVIDED };
         }
 
-        const [updatedCount] = await UserToken.update(
+        const [updatedCount] = await UserTokens.update(
             { isRevoked: true },
             {
                 where: {

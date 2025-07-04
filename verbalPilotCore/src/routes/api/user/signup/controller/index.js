@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { SALT_ROUNDS, JWT_SECRET, JWT_EXPIRY } = process.env;
-const { User, UserToken } = require('../../../../../../models');
+const { User, UserTokens } = require('../../../../../../models');
 const { updateEmailVerification } = require('../../../../../commonServices/users/sendEmailVerificationCode');
 const {responseMessages, tokenType, EMAIL_TEMPLATES } = require('../../../../../constant/genericConstants/commonConstant');
 const logger = require('../../../../../utils/logger');
@@ -82,7 +82,7 @@ const handleSignup = async ({
         expiryDate.setSeconds(expiryDate.getSeconds() + expirySeconds);
 
         // Insert token into user_tokens table
-        await UserToken.create({
+        await UserTokens.create({
             userId: user.id,
             token,
             jwtExpiry: expiryDate,
