@@ -11,7 +11,12 @@ module.exports = (models) => {
         InterviewObjectUserGroupMapping,
         AIEngine,
         PromptResponseStructures,
-        Prompts
+        Prompts,
+        UserMeta,
+        UserInterview,
+        UserInterviewMeta,
+        UserInterviewQuestions,
+        UserInterviewAnswers
     } = models;
 
 
@@ -26,7 +31,7 @@ module.exports = (models) => {
         InterviewObject.belongsTo(InterviewObjectMeta, { foreignKey: 'InterviewObjectMetaId', as: 'InterviewObjectMeta' });
     }
 
-    if(Category && InterviewObject) {
+    if (Category && InterviewObject) {
         Category.hasMany(InterviewObject, { foreignKey: 'CategoryId' });
         InterviewObject.belongsTo(Category, { foreignKey: 'CategoryId' });
     }
@@ -48,10 +53,10 @@ module.exports = (models) => {
     //associate InterviewObjectUserGroupMapping with InterviewObject and UserGroup
     if (InterviewObjectUserGroupMapping && InterviewObject && UserGroup) {
         InterviewObjectUserGroupMapping.belongsTo(InterviewObject, { foreignKey: 'InterviewObjectId' });
-        InterviewObject.hasMany(InterviewObjectUserGroupMapping, { foreignKey: 'InterviewObjectId' });              
+        InterviewObject.hasMany(InterviewObjectUserGroupMapping, { foreignKey: 'InterviewObjectId' });
         InterviewObjectUserGroupMapping.belongsTo(UserGroup, { foreignKey: 'UserGroupId' });
         UserGroup.hasMany(InterviewObjectUserGroupMapping, { foreignKey: 'UserGroupId' });
-    }   
+    }
 
     //Associate with InterviewClass the AIEngine and PromptResponseStructures
     if (AIEngine && InterviewClass) {
@@ -64,8 +69,8 @@ module.exports = (models) => {
 
     // Associate InterviewClass with PromptResponseStructures for question and answer
     if (PromptResponseStructures && InterviewClass) {
-        InterviewClass.belongsTo(PromptResponseStructures, { as: 'QuestionPromptResponseStructure', foreignKey: 'QuestionPromptResponseStructureId' });
-        InterviewClass.belongsTo(PromptResponseStructures, { as: 'AnswerPromptResponseStructure', foreignKey: 'AnswerPromptResponseStructureId' });
+        InterviewClass.belongsTo(PromptResponseStructures, { as: 'QuestionPromptResponse', foreignKey: 'QuestionPromptResponseStructureId' });
+        InterviewClass.belongsTo(PromptResponseStructures, { as: 'AnswerPromptResponseStructures', foreignKey: 'AnswerPromptResponseStructureId' });
 
         PromptResponseStructures.hasMany(InterviewClass, { as: 'QuestionPromptResponseClasses', foreignKey: 'QuestionPromptResponseStructureId' });
         PromptResponseStructures.hasMany(InterviewClass, { as: 'AnswerPromptResponseClasses', foreignKey: 'AnswerPromptResponseStructureId' });
@@ -76,9 +81,34 @@ module.exports = (models) => {
 
     InterviewClass.belongsTo(Prompts, { as: 'AnswerPrompt', foreignKey: 'AnswerPromptId' });
     Prompts.hasMany(InterviewClass, { as: 'AnswerPromptClasses', foreignKey: 'AnswerPromptId' });
-    // Example: more associations
-    // if (InterviewClass && InterviewObject) {
-    //     InterviewClass.hasMany(InterviewObject, { foreignKey: 'InterviewClassId' });
-    //     InterviewObject.belongsTo(InterviewClass, { foreignKey: 'InterviewClassId' });
-    // }
+
+    UserMeta.belongsTo(User, { foreignKey: 'userId' });
+    User.hasOne(UserMeta, { foreignKey: 'userId' });
+
+    //UserInterview has one UserInterviewMeta
+    if (UserInterview && UserInterviewMeta) {
+        UserInterview.hasOne(UserInterviewMeta, { foreignKey: 'UserInterviewId', as: 'UserInterviewMeta' });
+        UserInterviewMeta.belongsTo(UserInterview, { foreignKey: 'UserInterviewId', as: 'UserInterview' });
+    }
+    // UserInterview belongs to User
+    if (UserInterview && User) {
+        UserInterview.belongsTo(User, { foreignKey: 'UserId' });
+        User.hasMany(UserInterview, { foreignKey: 'UserId' });
+    }
+
+    //UserInterview belongs to InterviewObject
+    if (UserInterview && InterviewObject) {
+        UserInterview.belongsTo(InterviewObject, { foreignKey: 'InterviewObjectId' });
+        InterviewObject.hasMany(UserInterview, { foreignKey: 'InterviewObjectId' });
+    }
+
+    if (UserInterview && UserInterviewQuestions) {
+        UserInterviewQuestions.belongsTo(UserInterview, { foreignKey: 'UserInterviewId' });
+        UserInterview.hasMany(UserInterviewQuestions, { foreignKey: 'UserInterviewId' });
+    }
+
+    if (UserInterviewQuestions && UserInterviewAnswers) {
+        UserInterviewAnswers.belongsTo(UserInterviewQuestions, { foreignKey: 'InterviewQuestionId' });
+        UserInterviewQuestions.hasOne(UserInterviewAnswers, { foreignKey: 'InterviewQuestionId' })
+    }
 };

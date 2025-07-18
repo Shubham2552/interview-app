@@ -12,6 +12,19 @@ module.exports = [
     ['WAITLIST', '/waitlist', 'get'],
     ['SURVEY', '/survey', 'post'],
     ['GET_AVAILAIBLE_INTERVIEWS', '/available-interviews', 'get'],
+    ['GET_INTERVIEW_META_OBJECT', '/interview-meta/:id', 'get'],
+    ['INITIATE_INTERVIEW', '/initiate-interview/:id', 'get'],
+    ['START_INTERVIEW', '/start-interview', 'post'],
+    ['GET_INTERVIEW_BY_STATUS', '/interview-by-status', 'get'],
+    ['GET_INTERVIEW_QUESTION', '/question/:id', 'get'],
+    ['SUBMIT_RESPONSE', '/submit-response/:id', 'post'],
+    ['END_INTERVIEW', '/end-interview/:id', 'get'],
+    ['TAB_SWITCHES', '/tab-switch/:id','get'],
+    ['INTERVIEW_RESULT', '/result/:id', 'get'],
+    ['INTEVIEW_DETAILS', '/details/:id', 'get'],
+
+    ['GET_USER_INTERVIEWS', '/user-interviews', 'get'],
+    ['GET_USER_INTERVIEW_META', '/user-interview-meta/:id', 'get'],
 ].reduce((acc, ele) => {
     acc[ele[0]] = {
         path: ele[1],

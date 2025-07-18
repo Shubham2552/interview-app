@@ -1,6 +1,6 @@
 const sendResponse = require('../../../../utils/responseHandler');
-const handleSignup = require('./controller');
-const { validateSignUp } = require('./validation');
+const handleSignup = require('./controller.signup');
+const validateSignup = require('./validate.signup');
 const { SIGN_UP } = require('../../../../constant/pathConstants');
 const logger = require('../../../../utils/logger');
 
@@ -34,7 +34,7 @@ const signUpHandler = async (req, res, next) => {
 
         logger.info('Signup request successful', {
             ...context,
-            userId: result.userId // Assuming the controller returns userId
+            userId: result.userId
         });
 
         sendResponse(res, 200, true, { token: result.token }, result.message);
@@ -52,5 +52,5 @@ module.exports = {
     path: SIGN_UP.path,
     method: SIGN_UP.method,
     handler: signUpHandler, 
-    middleware: [validateSignUp] 
+    middleware: [validateSignup] 
 };

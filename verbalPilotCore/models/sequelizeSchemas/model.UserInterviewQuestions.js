@@ -1,34 +1,20 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-    return sequelize.define('AIEngine', {
+    return sequelize.define('UserInterviewQuestions', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
             allowNull: false,
         },
-        name: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true
-        },
-        displayName: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true,
-        },
-        description: {
-            type: DataTypes.STRING,
-            allowNull: true
-        },
-        engineType: {
-            type: DataTypes.ENUM('openai', 'gemini'),
-            allowNull: false
-        },
-        engineModel: {
-            type: DataTypes.STRING,
+        UserInterviewId: {
+            type: DataTypes.INTEGER,
             allowNull: true,
+        },
+        QuestionText: {
+            type: DataTypes.STRING,
+            allowNull: false
         },
         isActive: {
             type: DataTypes.BOOLEAN,
@@ -42,14 +28,30 @@ module.exports = (sequelize) => {
         },
         createdAt: {
             type: DataTypes.DATE,
-            allowNull: false,
             defaultValue: DataTypes.NOW
         },
         updatedAt: {
             type: DataTypes.DATE,
-            allowNull: false,
             defaultValue: DataTypes.NOW
         }
-    });
-
+    }, {
+        tableName: 'UserInterviewQuestions',
+        timestamps: true
+    })
 }
+
+
+/*
+Step 1: Question generate, and store in UserInterviewQuestion
+Step 2: 
+a) User respond to question:
+ submit the api goes to backend and store the answer
+ ai is called and feedback is generated and response of feedback is stored
+
+b) User skip the question 
+ question is marked as skipped
+c) User end the interview 
+end api is called
+d) Click for next question
+    after submit it will call the next question
+*/

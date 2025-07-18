@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
-const sendResponse = require('../utils/responseHandler'); // Adjust the path as needed
-const { UserTokens } = require('../../models'); // Adjust the path as needed
+const sendResponse = require('./responseHandler');
+const { validateUserToken, getUserByEmail } = require('../../models/queries/query.user');
 const logger = require('./logger');
+
 /**
  * Middleware to authenticate requests using JWT.
  * It checks for the presence of a token in the Authorization header,
@@ -26,7 +27,7 @@ const authMiddleware = async (req, res, next) => {
 
     if (!token) {
         logger.warn('No authentication token provided', { ...context });
-        return sendResponse(res, 401, false, 'Access denied. No token provided.');
+        return sendResponse(res, 401, false, null, 'Access denied. No token provided.');
     }
 
     try {
@@ -34,20 +35,22 @@ const authMiddleware = async (req, res, next) => {
         context.userId = decoded.id;
         context.email = decoded.email;
 
-        const tokenData = await UserTokens.findOne({
-            where: {
-                token: token,
-                userId: decoded.id,
-                isRevoked: false
-            }
-        });
-
-        console.log('Token Data:', tokenData);
         // Check if the token exists and is not revoked
+        const tokenData = await validateUserToken(token, decoded.id);
         if (!tokenData) {
             logger.warn('Invalid or revoked token', { ...context });
             return sendResponse(res, 403, false, null, 'Token is invalid or has been revoked.');
         }
+
+        // Check if the user exists and is not deleted
+        const user = await getUserByEmail(decoded.email);
+        if (!user) {
+            logger.warn('User not found or deleted', { ...context });
+            return sendResponse(res, 403, false, null, 'User account not found or has been deleted.');
+        }
+
+        console.log('Token Data:', tokenData);
+        console.log('User Data:', user);
 
         logger.info('Authentication successful', { ...context });
         req.user = decoded;

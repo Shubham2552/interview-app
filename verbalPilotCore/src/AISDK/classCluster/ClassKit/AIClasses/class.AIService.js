@@ -37,6 +37,33 @@ class AIService {
         const engine = await this.getEngine(provider, config);
         return engine.generateContent(params);
     }
+
+    populatePromptTemplate(prompt, props) {
+        if (!prompt || !props) {
+            throw new Error('Prompt and properties must be provided');
+        }
+
+        let populatedPrompt = prompt;
+        for (const [key, value] of Object.entries(props)) {
+            let replacementValue = value;
+            if (Array.isArray(value)) {
+                if (value.length > 0 && typeof value[0] === 'object') {
+                    // Array of objects: convert to pretty JSON string
+                    replacementValue = JSON.stringify(value, null, 2);
+                } else {
+                    // Array of primitives: join as comma-separated
+                    replacementValue = value.join(', ');
+                }
+            } else if (typeof value === 'object' && value !== null) {
+                // Single object: convert to pretty JSON string
+                replacementValue = JSON.stringify(value, null, 2);
+            }
+            const placeholder = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+            populatedPrompt = populatedPrompt.replace(placeholder, replacementValue);
+        }
+        console.log('Populated Prompt:', { populatedPrompt });
+        return populatedPrompt;
+    }
 }
 
 module.exports = new AIService();

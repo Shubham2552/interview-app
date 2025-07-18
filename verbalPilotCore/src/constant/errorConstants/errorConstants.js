@@ -18,5 +18,8 @@ module.exports = {
     'SURVEY_SUBMIT_FAILED': 'Failed to submit survey',
     'WAITLIST_SEND_EMAIL_ERROR': 'Failed to send waitlist thank you email.',
     'PRE_REGISTRATION_SURVEY_SEND_EMAIL_ERROR': 'Failed to send pre-registration survey email.',
-
+    'INTERVIEW_OBJECT_NOT_FOUND': 'Interview object not found',
+    'INTERVIEW_OBJECT_META_NOT_FOUND': 'Interview object meta not found',
+    'INTERVIEW_INITIATION_FAILED': 'Failed to initiate interview',
+    'FAILED_TO_FIND_INTERVIEWS': 'Failed to find interviews'
 }

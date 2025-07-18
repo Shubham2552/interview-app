@@ -20,5 +20,10 @@ module.exports = {
     'SURVEY_SUBMITTED_SUCCESSFULLY': 'Survey submitted successfully',
     'WAITLIST_SEND_EMAIL_SUCCESS': 'Waitlist thank you email sent successfully.',
     'PRE_REGISTRATION_SURVEY_SEND_EMAIL_SUCCESS': 'Pre-registration survey email sent successfully.',
+    'AVAILABLE_INTERVIEWS_FETCHED': 'Available interviews fetched successfully',
+    'INTERVIEW_OBJECT_META_FETCHED': 'Interview object meta fetched successfully',
+    'INTERVIEW_INITIATED': 'Interview initiated successfully',
+    'USER_INTERVIEWS_FETCHED_SUCCESSFULLY': 'User interviews fetched successfully',
+    'INTERVIEW_STARTED_SUCCESSFULLY': 'Interview started successfully',
 
 }

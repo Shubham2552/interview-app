@@ -1,6 +1,6 @@
 const sendResponse = require('../../../../utils/responseHandler');
-const handleLogin = require('./controller');
-const { validateLogin } = require('./validation');
+const handleLogin = require('./controller.login');
+const validateLogin = require('./validate.login');
 const { LOGIN } = require('../../../../constant/pathConstants');
 const logger = require('../../../../utils/logger');
 
@@ -37,7 +37,7 @@ const loginHandler = async (req, res, next) => {
 
         logger.info('Login request successful', {
             ...context,
-            userId: result.userId // Assuming the controller returns userId
+            userId: result.userId
         });
 
         sendResponse(res, 200, true, { token: result.token }, result.message);

@@ -1,4 +1,4 @@
-const { User } = require('../../../../../../models');
+const { getUserProfileById } = require('../../../../../../models/queries/query.user');
 const { responseMessages } = require('../../../../../constant/genericConstants/commonConstant');
 const logger = require('../../../../../utils/logger');
 const { logError } = require('../../../../../utils/errorLogger');
@@ -9,24 +9,7 @@ const handleProfile = async (id) => {
     try {
         logger.info('Fetching user profile', { ...context });
 
-        const existingUser = await User.findOne({
-            where: { 
-                id,
-                isDeleted: false
-            },
-            attributes: [
-                'id',
-                'email',
-                'gender',
-                'dateOfBirth',
-                'firstName',
-                'lastName',
-                'isVerified',
-                'phone',
-                'createdAt',
-                'updatedAt'
-            ]
-        });
+        const existingUser = await getUserProfileById(id);
 
         if(!existingUser) {
             logger.warn('Profile fetch failed: User not found', { ...context });

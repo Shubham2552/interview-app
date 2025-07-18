@@ -46,3 +46,15 @@ exports.EMAIL_TEMPLATES = {
         subject: 'Thanks! You request has a special place.'
     }
 }
+
+exports.INTERVIEW_STATUSES = {
+    PENDING: 'PENDING',
+    IN_PROGRESS: 'IN_PROGRESS',
+    COMPLETED: 'COMPLETED'
+}
+
+exports.QUESTION_STATUS = {
+    ANSWERED: 'ANSWERED',
+    UNANSWERED: 'UNANSWERED',
+    SKIPPED: 'SKIPPED',
+}
