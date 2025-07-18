@@ -5,10 +5,11 @@ const logger = require('../../../../utils/logger');
 
 const submitResponseHandler = async (req, res, next) => {
     const userInterviewId = req.params.id;
+    const userId = req.user.id;
     const { question, answer, status, questionId } = req.body;
     try {
         logger.info('Submit response request received', { userInterviewId, status, questionId });
-        const result = await handleSubmitResponse({ userInterviewId, question, answer, status, interviewQuestionId: questionId });
+        const result = await handleSubmitResponse({ userInterviewId, question, answer, status, interviewQuestionId: questionId, userId });
         if (result.Error) {
             logger.warn('Submit response failed', { userInterviewId, error: result.message });
             return sendResponse(res, 400, false, null, result.message);

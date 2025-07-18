@@ -2,19 +2,20 @@ const {
     insertUserInterviewResponseFeedback,
     insertUserInterviewAnswer,
     getLatestUserInterviewQuestion,
-    getFullResponseInterviewContext
+    getFullResponseInterviewContext,
+    skipUserInterviewQuestion
 } = require('../../../../../models/queries/query.interview');
 const { responseMessages, QUESTION_STATUS } = require('../../../../constant/genericConstants/commonConstant');
 const logger = require('../../../../utils/logger');
 const { logError } = require('../../../../utils/errorLogger');
 const AIService = require('../../../../AISDK/classCluster/ClassKit/AIClasses/class.AIService');
 
-const handleSubmitResponse = async ({ userInterviewId, answer, status, interviewQuestionId }) => {
+const handleSubmitResponse = async ({ userInterviewId, answer, status, interviewQuestionId, userId }) => {
     try {
         logger.info('Starting handleSubmitResponse process', { userInterviewId, status });
 
         //Get User context
-        const context = await getFullResponseInterviewContext(userInterviewId);
+        const context = await getFullResponseInterviewContext(userInterviewId, userId);
 
         //Check valid context
         if (!context) {
@@ -27,7 +28,18 @@ const handleSubmitResponse = async ({ userInterviewId, answer, status, interview
         }
 
         if(status === QUESTION_STATUS.SKIPPED){
-            
+            const skipQuestion = await skipUserInterviewQuestion(interviewQuestionId);
+            if(skipQuestion) {
+                return {
+                    Error: false,
+                    message: 'Question skipped!',
+                    data: null,
+                }
+            }
+            return {
+                Error: true,
+                message: 'Error skipping question!!',
+            }
         }
 
 

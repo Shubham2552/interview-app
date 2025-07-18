@@ -2,7 +2,8 @@ const {
     getLatestUserInterviewQuestion,
     insertUserInterviewQuestion,
     getFullInterviewContext,
-    getAllInterviewQuestions
+    getAllInterviewQuestions,
+    userInterviewQuestionCappingCheck
 } = require('../../../../../models/queries/query.interview');
 const { responseMessages, QUESTION_STATUS,   } = require('../../../../constant/genericConstants/commonConstant');
 const logger = require('../../../../utils/logger');
@@ -29,14 +30,22 @@ const handleInterviewQuestion = async ({ interviewId, userId }) => {
         }
 
         // 2. No unanswered question, generate a new one using AIService
-        const context = await getFullInterviewContext(interviewId);
+        const context = await getFullInterviewContext(interviewId, userId);
         if (!context) {
             logger.warn('No interview context found', { interviewId });
             return {
                 Error: true,
                 message: 'Interview context not found',
-                data: null
             };
+        }
+
+        const userQuestionCapping = await userInterviewQuestionCappingCheck(userId, interviewId);
+
+        if(userQuestionCapping && userQuestionCapping.total_interview_questions >= userQuestionCapping.interview_question_capping ){
+            return {
+                Error: true,
+                message: `You have reach maximum limit of ${userQuestionCapping.interview_question_capping} questions!`,
+            }
         }
 
         const allPreviousQuestions = await getAllInterviewQuestions(interviewId);

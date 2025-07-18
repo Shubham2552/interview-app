@@ -254,7 +254,7 @@ async function insertUserInterviewQuestion(userInterviewId, questionObject) {
 }
 
 // Keep the original getFullInterviewContext
-async function getFullInterviewContext(userInterviewId) {
+async function getFullInterviewContext(userInterviewId, userId) {
     const query = `
         SELECT
             ui.id AS user_interview_id,
@@ -291,6 +291,7 @@ async function getFullInterviewContext(userInterviewId) {
         LEFT JOIN prompts p ON ic.question_prompt_id = p.id
         LEFT JOIN ai_engine aie ON ic.question_ai_engine_id = aie.id
         WHERE ui.id = $1
+          AND ui.user_id = $2
           AND ui.is_active = TRUE
           AND ui.is_deleted = FALSE
           AND uim.is_active = TRUE
@@ -300,12 +301,12 @@ async function getFullInterviewContext(userInterviewId) {
           AND uim.status <> 'COMPLETED'
         LIMIT 1
     `;
-    const { rows } = await pgQuery(query, [userInterviewId]);
+    const { rows } = await pgQuery(query, [userInterviewId, userId]);
     return rows[0] || null;
 }
 
 // Add the new getFullResponseInterviewContext as a separate function
-async function getFullResponseInterviewContext(userInterviewId) {
+async function getFullResponseInterviewContext(userInterviewId, userId) {
     const query = `
        SELECT
             ui.id AS user_interview_id,
@@ -354,6 +355,7 @@ async function getFullResponseInterviewContext(userInterviewId) {
         LEFT JOIN prompt_response_structures prs_a ON ic.answer_prompt_response_structure_id = prs_a.id
 
         WHERE ui.id = $1
+          AND ui.user_id = $2
           AND ui.is_active = TRUE
           AND ui.is_deleted = FALSE
           AND uim.is_active = TRUE
@@ -363,7 +365,7 @@ async function getFullResponseInterviewContext(userInterviewId) {
           AND uim.status <> 'COMPLETED'
         LIMIT 1
     `;
-    const { rows } = await pgQuery(query, [userInterviewId]);
+    const { rows } = await pgQuery(query, [userInterviewId, userId]);
     return rows[0] || null;
 }
 
@@ -624,6 +626,17 @@ async function userInterviewQuestionCappingCheck(userId, userInterviewId) {
     return rows[0] || null;
 }
 
+async function skipUserInterviewQuestion(questionId) {
+    const query = `
+        UPDATE user_interview_questions
+        SET status = 'SKIPPED'
+        WHERE id = $1
+        RETURNING *;
+    `;
+    const { rows } = await pgQuery(query, [questionId]);
+    return rows[0] || null;
+}
+
 module.exports = {
     getAvailableInterviews,
     getInterviewObjectMeta,
@@ -644,5 +657,6 @@ module.exports = {
     userInterviewResult,
     userInterviewCappingCheck,
     interviewUserProperties,
-    userInterviewQuestionCappingCheck
+    userInterviewQuestionCappingCheck,
+    skipUserInterviewQuestion
 }; 
