@@ -1,13 +1,21 @@
 const sendEmail = require('../../utils/email/emailSender');
 const { EMAIL_TEMPLATES, responseMessages } = require('../../constant/genericConstants/commonConstant');
 const logger = require('../../utils/logger');
+const { getUserForPasswordResetByEmail } = require('../../../models/queries/query.user');
 
-const sendForgotPasswordEmail = async ({ user, resetLink, type }) => {
+const sendForgotPasswordEmail = async ({ email, resetLink, type }) => {
+    // Fetch user by email using the new query
+    const user = await getUserForPasswordResetByEmail(email);
     const context = {
-        userId: user.id,
-        email: user.email,
+        userId: user ? user.id : undefined,
+        email: email,
         emailType: type
     };
+
+    if (!user) {
+        logger.error('User not found for password reset', { ...context });
+        return { Error: true, message: responseMessages.ERROR_CONSTANTS.USER_NOT_FOUND };
+    }
 
     try {
         logger.info('Sending password reset email', { ...context });

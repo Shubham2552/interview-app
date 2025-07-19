@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken');
 const { JWT_EXPIRY, FRONTEND_URL } = process.env;
-const { User, UserTokens } = require('../../../../../../models');
-const { responseMessages, tokenType, EMAIL_TEMPLATES } = require('../../../../../constant/genericConstants/commonConstant');
-const { sendForgotPasswordEmail } = require('../../../../../commonServices/users/forgotPasswordEmail');
-const logger = require('../../../../../utils/logger');
-const { logError } = require('../../../../../utils/errorLogger');
+const { responseMessages, tokenType, EMAIL_TEMPLATES } = require('../../../../constant/genericConstants/commonConstant');
+const { sendForgotPasswordEmail } = require('../../../../commonServices/users/forgotPasswordEmail');
+const logger = require('../../../../utils/logger');
+const { logError } = require('../../../../utils/errorLogger');
+const { getUserForPasswordResetByEmail, insertUserToken } = require('../../../../../models/queries/query.user');
 
 const handleForgotPassword = async ({email, ipAddress, deviceInfo}) => {
     const context = { email, ipAddress };
@@ -12,7 +12,8 @@ const handleForgotPassword = async ({email, ipAddress, deviceInfo}) => {
     try {
         logger.info('Starting forgot password process', { ...context });
 
-        const user = await User.findOne({ where: { email } });
+        // Fetch user by email using the new query
+        const user = await getUserForPasswordResetByEmail(email);
         if (!user) {
             logger.warn('Forgot password failed: User not found', { ...context });
             return { Error: true, message: responseMessages.ERROR_CONSTANTS.USER_NOT_FOUND };
@@ -22,29 +23,32 @@ const handleForgotPassword = async ({email, ipAddress, deviceInfo}) => {
 
         // Generate a jwt token for password reset
         const resetToken = jwt.sign(
-            { id: user.id, email: user.email, isVerified: user.isVerified },
+            { id: user.id, email: user.email },
             process.env.JWT_SECRET,
             { expiresIn: JWT_EXPIRY }
         );
 
         logger.info('Reset token generated', { ...context });
 
-        // Put this token in the usertokens table
-        await UserTokens.create({
+        // Calculate expiry from token
+        const decoded = jwt.decode(resetToken);
+        const jwtExpiry = new Date(Date.now() + (decoded.exp - decoded.iat) * 1000);
+
+        // Insert this token in the user_tokens table using query
+        await insertUserToken({
             userId: user.id,
             token: resetToken,
-            jwtExpiry: new Date(Date.now() + (jwt.decode(resetToken).exp - jwt.decode(resetToken).iat) * 1000), // Calculate expiry from token
-            isRevoked: false,
-            deviceInfo: deviceInfo,
-            ipAddress: ipAddress,
-            tokenType: tokenType.RESET_PASSWORD
+            jwtExpiry,
+            tokenType: tokenType.RESET_PASSWORD,
+            deviceInfo,
+            ipAddress
         });
 
         logger.info('Reset token stored in database', { ...context });
 
         // Send email
         const result = await sendForgotPasswordEmail({
-            user,
+            email: user.email,
             resetLink: `${FRONTEND_URL}/reset-password?token=${resetToken}`,
             type: EMAIL_TEMPLATES.keys.RESET_PASSWORD
         });

@@ -194,6 +194,18 @@ async function getUserVerificationDataById(id) {
     return rows[0] || null;
 }
 
+async function getUserForPasswordResetByEmail(email) {
+    const query = `
+        SELECT u.id, u.email, u.first_name AS "firstName", u.last_name AS "lastName"
+        FROM users u
+        INNER JOIN user_meta um ON u.id = um.user_id
+        WHERE u.email = $1 AND um.is_deleted = false
+        LIMIT 1
+    `;
+    const { rows } = await pgQuery(query, [email]);
+    return rows[0] || null;
+}
+
 module.exports = {
     getUserProfileById,
     getUserByEmail,
@@ -206,5 +218,6 @@ module.exports = {
     createUserMeta,
     updateUserData,
     setUserVerified,
-    getUserVerificationDataById
+    getUserVerificationDataById,
+    getUserForPasswordResetByEmail
 }; 

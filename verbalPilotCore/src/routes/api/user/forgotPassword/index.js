@@ -1,6 +1,6 @@
 const sendResponse = require('../../../../utils/responseHandler');
 const { FORGOT_PASSWORD } = require('../../../../constant/pathConstants');
-const handleForgotPassword = require('./controller');
+const handleForgotPassword = require('./controller.forgotPassword');
 
 const forgotPasswordHandler = async (req, res, next) => {
     try {
