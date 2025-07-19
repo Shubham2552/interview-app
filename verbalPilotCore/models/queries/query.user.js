@@ -170,6 +170,30 @@ async function updateUserData({
     return rows[0];
 }
 
+async function setUserVerified(userId) {
+    // Assuming is_verified is in user_meta table
+    const query = `
+        UPDATE user_meta
+        SET is_verified = true, updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = $1 AND is_deleted = false
+        RETURNING *
+    `;
+    const { rows } = await pgQuery(query, [userId]);
+    return rows[0];
+}
+
+async function getUserVerificationDataById(id) {
+    const query = `
+        SELECT u.id, u.email, u.verification_code AS "verificationCode", um.is_verified AS "isVerified"
+        FROM users u
+        INNER JOIN user_meta um ON u.id = um.user_id
+        WHERE u.id = $1 AND um.is_deleted = false
+        LIMIT 1
+    `;
+    const { rows } = await pgQuery(query, [id]);
+    return rows[0] || null;
+}
+
 module.exports = {
     getUserProfileById,
     getUserByEmail,
@@ -180,5 +204,7 @@ module.exports = {
     validateUserToken,
     updateUserVerificationCode,
     createUserMeta,
-    updateUserData
+    updateUserData,
+    setUserVerified,
+    getUserVerificationDataById
 }; 

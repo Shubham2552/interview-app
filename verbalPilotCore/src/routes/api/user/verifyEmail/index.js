@@ -1,6 +1,5 @@
 const sendResponse = require('../../../../utils/responseHandler');
-const handleVerifyEmail = require('./controller');
-const authMiddleware = require('../../../../utils/authMiddleware');
+const handleVerifyEmail = require('./controller.verifyEmail');
 const { VERIFY_EMAIL } = require('../../../../constant/pathConstants');
 const logger = require('../../../../utils/logger');
 
@@ -19,10 +18,10 @@ const verifyEmailHandler = async (req, res, next) => {
         const { id } = req.user;
         const result = await handleVerifyEmail(id, req.query.code);
 
-        if (result.error) {
+        if (result.Error) {
             logger.warn('Email verification failed', {
                 ...context,
-                error: result.message
+                Error: result.message
             });
             return sendResponse(res, 400, false, null, result.message);
         }
@@ -43,5 +42,5 @@ module.exports = {
     path: VERIFY_EMAIL.path,
     method: VERIFY_EMAIL.method, 
     handler: verifyEmailHandler, 
-    middleware: [authMiddleware]
+    auth:true
 };

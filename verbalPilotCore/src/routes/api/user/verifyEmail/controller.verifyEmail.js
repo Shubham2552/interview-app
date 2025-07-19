@@ -1,4 +1,4 @@
-const { User } = require('../../../../../models');
+const { getUserVerificationDataById, setUserVerified } = require('../../../../../models/queries/query.user');
 const { responseMessages } = require('../../../../constant/genericConstants/commonConstant');
 const logger = require('../../../../utils/logger');
 const { logError } = require('../../../../utils/errorLogger');
@@ -9,20 +9,8 @@ const handleVerifyEmail = async (id, verificationCode) => {
     try {
         logger.info('Starting email verification process', { ...context });
 
-        const existingUser = await User.findOne({
-            where: { 
-                id,
-                isDeleted: false 
-            },
-            attributes: [
-                'id',
-                'email',
-                'firstName',
-                'lastName',
-                'verificationCode',
-                'isVerified'
-            ]
-        });
+        // Use direct query to get user verification data
+        const existingUser = await getUserVerificationDataById(id);
 
         if (!existingUser) {
             logger.warn('Email verification failed: User not found', { ...context });
@@ -44,8 +32,8 @@ const handleVerifyEmail = async (id, verificationCode) => {
             return { Error: true, message: responseMessages.ERROR_CONSTANTS.INVALID_VERIFCATION_CODE };
         }
 
-        // Update the user's verification status
-        await existingUser.update({ isVerified: true });
+        // Update the user's verification status using direct query
+        await setUserVerified(id);
         logger.info('User email verified successfully', { ...context });
 
         return { 
