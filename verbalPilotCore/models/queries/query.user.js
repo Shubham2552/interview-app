@@ -2,8 +2,8 @@ const { pgQuery, pgPool } = require('../index');
 
 async function getUserProfileById(id) {
     const query = `
-        SELECT u.id, u.email, u.gender, u.date_of_birth, u.first_name, u.last_name, 
-               um.is_verified, u.phone, u.created_at, u.updated_at
+        SELECT u.id, u.email, u.gender, u.date_of_birth AS "dateOfBirth", u.first_name AS "firstName", u.last_name AS "lastName", 
+               um.is_verified AS "isVerified", u.phone, u.created_at, u.updated_at
         FROM users u
         INNER JOIN user_meta um ON u.id = um.user_id
         WHERE u.id = $1 AND um.is_deleted = false
@@ -139,6 +139,37 @@ async function createUserMeta({ userId, isVerified, isDeleted }) {
     return rows[0];
 }
 
+async function updateUserData({
+    userId,
+    firstName,
+    lastName,
+    gender,
+    dateOfBirth,
+    phone
+}) {
+    const query = `
+        UPDATE users
+        SET
+            first_name = $1,
+            last_name = $2,
+            gender = $3,
+            date_of_birth = $4,
+            phone = $5,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = $6
+        RETURNING *
+    `;
+    const { rows } = await pgQuery(query, [
+        firstName,
+        lastName,
+        gender,
+        dateOfBirth,
+        phone,
+        userId
+    ]);
+    return rows[0];
+}
+
 module.exports = {
     getUserProfileById,
     getUserByEmail,
@@ -148,5 +179,6 @@ module.exports = {
     revokeUserTokens,
     validateUserToken,
     updateUserVerificationCode,
-    createUserMeta
+    createUserMeta,
+    updateUserData
 }; 

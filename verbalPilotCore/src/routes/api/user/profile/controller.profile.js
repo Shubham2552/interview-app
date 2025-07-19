@@ -1,7 +1,7 @@
-const { getUserProfileById } = require('../../../../../../models/queries/query.user');
-const { responseMessages } = require('../../../../../constant/genericConstants/commonConstant');
-const logger = require('../../../../../utils/logger');
-const { logError } = require('../../../../../utils/errorLogger');
+const { getUserProfileById } = require('../../../../../models/queries/query.user');
+const { responseMessages } = require('../../../../constant/genericConstants/commonConstant');
+const logger = require('../../../../utils/logger');
+const { logError } = require('../../../../utils/errorLogger');
 
 const handleProfile = async (id) => {
     const context = { userId: id };

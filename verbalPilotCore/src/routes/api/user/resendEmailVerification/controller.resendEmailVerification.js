@@ -1,8 +1,8 @@
-const { User } = require('../../../../../../models');
-const { updateEmailVerification } = require('../../../../../commonServices/users/sendEmailVerificationCode');
-const { responseMessages, EMAIL_TEMPLATES } = require('../../../../../constant/genericConstants/commonConstant');
-const logger = require('../../../../../utils/logger');
-const { logError } = require('../../../../../utils/errorLogger');
+const { getUserProfileById } = require('../../../../../models/queries/query.user');
+const { updateEmailVerification } = require('../../../../commonServices/users/sendEmailVerificationCode');
+const { responseMessages, EMAIL_TEMPLATES } = require('../../../../constant/genericConstants/commonConstant');
+const logger = require('../../../../utils/logger');
+const { logError } = require('../../../../utils/errorLogger');
 
 const handleResendEmailVerification = async (id) => {
     const context = { userId: id };
@@ -10,16 +10,8 @@ const handleResendEmailVerification = async (id) => {
     try {
         logger.info('Starting email verification resend process', { ...context });
 
-        const existingUser = await User.findOne({
-            where: { id },
-            attributes: [
-                'id',
-                'email',
-                'firstName',
-                'lastName',
-                'isVerified'
-            ]
-        });
+        // Use direct query to get user profile
+        const existingUser = await getUserProfileById(id);
 
         if (!existingUser) {
             logger.warn('Email verification resend failed: User not found', { ...context });

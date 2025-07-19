@@ -1,7 +1,7 @@
-const { User } = require('../../../../../../models');
-const { responseMessages } = require('../../../../../constant/genericConstants/commonConstant');
-const logger = require('../../../../../utils/logger');
-const { logError } = require('../../../../../utils/errorLogger');
+const { User } = require('../../../../../models');
+const { responseMessages } = require('../../../../constant/genericConstants/commonConstant');
+const logger = require('../../../../utils/logger');
+const { logError } = require('../../../../utils/errorLogger');
 
 const handleVerifyEmail = async (id, verificationCode) => {
     const context = { userId: id };

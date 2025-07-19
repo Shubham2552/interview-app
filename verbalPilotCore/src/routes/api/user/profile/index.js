@@ -1,5 +1,5 @@
 const sendResponse = require('../../../../utils/responseHandler');
-const handleProfile = require('./controller');
+const handleProfile = require('./controller.profile');
 const authMiddleware = require('../../../../utils/authMiddleware');
 const { PROFILE } = require('../../../../constant/pathConstants');
 const logger = require('../../../../utils/logger');

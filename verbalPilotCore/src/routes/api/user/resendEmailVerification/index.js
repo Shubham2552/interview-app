@@ -1,5 +1,5 @@
 const sendResponse = require('../../../../utils/responseHandler');
-const handleResendEmailVerification = require('./controller');
+const handleResendEmailVerification = require('./controller.resendEmailVerification');
 const authMiddleware = require('../../../../utils/authMiddleware');
 const { RESEND_EMAIL_VERIFICATION } = require('../../../../constant/pathConstants');
 

@@ -1,7 +1,7 @@
 const sendResponse = require('../../../../utils/responseHandler');
-const handleUpdateProfile = require('./controller');
+const handleUpdateProfile = require('./controller.updateProfile');
 const authMiddleware = require('../../../../utils/authMiddleware');
-const { validateUpdateProfile } = require('./validation');
+const { validateUpdateProfile } = require('./validation.updateProfile');
 const { UPDATE_PROFILE } = require('../../../../constant/pathConstants');
 const logger = require('../../../../utils/logger');
 
@@ -18,7 +18,7 @@ const profileHandler = async (req, res, next) => {
         logger.info('Update profile request received', { ...context });
 
         const { id: userId } = req.user;
-        const result = await handleUpdateProfile({userId, ...req.body});
+        const result = await handleUpdateProfile({ userId, ...req.body});
 
         if (result.Error) {
             logger.warn('Update profile request failed', {
@@ -44,5 +44,6 @@ module.exports = {
     path: UPDATE_PROFILE.path,
     method: UPDATE_PROFILE.method,
     handler: profileHandler,
-    middleware: [authMiddleware, validateUpdateProfile]
+    auth: true,
+    middleware: [validateUpdateProfile]
 };

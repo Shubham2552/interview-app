@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const sendResponse = require('../../../../../utils/responseHandler');
+const sendResponse = require('../../../../utils/responseHandler');
 
 const updateProfileSchema = Joi.object({
     firstName: Joi.string().required().messages({
