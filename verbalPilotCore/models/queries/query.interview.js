@@ -151,7 +151,8 @@ async function createUserInterviewWithMeta({
     userId,
     questionProperties = {},
     answerProperties = {},
-    status = 'in_progress'
+    status = 'in_progress',
+    cycleId // new parameter
 }) {
     const client = await pgPool.connect();
 
@@ -187,6 +188,17 @@ async function createUserInterviewWithMeta({
             status
         ]);
         const userInterviewMeta = userInterviewMetaResult.rows[0];
+
+        // 3. Increment used_count in user_subscription_cycles if cycleId is provided
+        if (cycleId) {
+            const updateCycleQuery = `
+                UPDATE user_subscription_cycles
+                SET used_count = used_count + 1, updated_at = CURRENT_TIMESTAMP
+                WHERE id = $1
+                RETURNING *;
+            `;
+            await client.query(updateCycleQuery, [cycleId]);
+        }
 
         await client.query('COMMIT');
 
@@ -569,35 +581,36 @@ async function userInterviewResult(userInterviewId, userId) {
 }
 
 async function userInterviewCappingCheck(userId) {
-    const query = `SELECT
-            ui.user_id,
-            um.subscription_id,
-            uis.user_interview_capping,
-            COUNT(ui.id) AS total_interviews
-        FROM
-            user_interviews ui
-        INNER JOIN
-            user_meta um
-            ON um.user_id = ui.user_id
-        INNER JOIN
-            user_interview_subscription uis
-            ON um.subscription_id = uis.id
-        WHERE
-            ui.user_id = $1
-            AND ui.is_active = TRUE
-            AND ui.is_deleted = FALSE
-            AND um.is_active = TRUE
-            AND um.is_deleted = FALSE
-            AND uis.is_active = TRUE
-            AND uis.is_deleted = FALSE
-        GROUP BY
-            ui.user_id,
-            um.subscription_id,
-            uis.user_interview_capping;`
-
+    const query = `
+        SELECT 
+            m.id                AS master_subscription_id,
+            m.user_id,
+            m.plan_id,
+            p.display_name      AS plan_name,
+            p.user_interview_capping,
+            c.id                AS cycle_id,
+            c.cycle_start,
+            c.cycle_end,
+            COUNT(ui.id)        AS used_count,
+            (p.user_interview_capping - COUNT(ui.id)) AS remaining_interviews
+        FROM user_master_subscriptions m
+        JOIN user_interview_plans p
+            ON m.plan_id = p.id
+        JOIN user_subscription_cycles c
+            ON c.master_subscription_id = m.id
+        LEFT JOIN user_interviews ui
+            ON ui.user_id = m.user_id
+           AND ui.created_at::date BETWEEN c.cycle_start AND c.cycle_end
+        WHERE m.user_id = $1
+          AND m.status = 'ACTIVE'
+          AND CURRENT_DATE BETWEEN m.start_date AND m.end_date
+          AND CURRENT_DATE BETWEEN c.cycle_start AND c.cycle_end
+        GROUP BY 
+            m.id, m.user_id, m.plan_id, p.display_name, p.user_interview_capping, 
+            c.id, c.cycle_start, c.cycle_end;
+    `;
     const { rows } = await pgQuery(query, [userId]);
     return rows[0] || null;
-
 }
 
 async function interviewUserProperties(userId, userInterviewId) {
@@ -628,28 +641,31 @@ async function interviewUserProperties(userId, userInterviewId) {
 
 async function userInterviewQuestionCappingCheck(userId, userInterviewId) {
     const query = `
-        SELECT COUNT(uiq.id) AS total_interview_questions,
-               ui.user_id,
-               uis.interview_question_capping
+        SELECT 
+            COUNT(uiq.id) AS total_interview_questions,
+            ui.user_id,
+            p.interview_question_capping
         FROM user_interview_questions uiq
-        INNER JOIN user_interviews ui ON uiq.user_interview_id = ui.id
-        INNER JOIN user_meta um ON um.user_id = ui.user_id
-        INNER JOIN user_interview_subscription uis ON um.subscription_id = uis.id
+        INNER JOIN user_interviews ui 
+            ON uiq.user_interview_id = ui.id
+        INNER JOIN user_master_subscriptions ms
+            ON ms.user_id = ui.user_id
+           AND ms.status = 'ACTIVE'
+           AND CURRENT_DATE BETWEEN ms.start_date AND ms.end_date
+        INNER JOIN user_interview_plans p
+            ON ms.plan_id = p.id
         WHERE ui.user_id = $1
           AND uiq.user_interview_id = $2
           AND ui.is_active = TRUE
           AND ui.is_deleted = FALSE
-          AND um.is_active = TRUE
-          AND um.is_deleted = FALSE
-          AND uis.is_active = TRUE
-          AND uis.is_deleted = FALSE
           AND uiq.is_active = TRUE
           AND uiq.is_deleted = FALSE
-        GROUP BY uis.interview_question_capping, ui.user_id;
+        GROUP BY p.interview_question_capping, ui.user_id;
     `;
     const { rows } = await pgQuery(query, [userId, userInterviewId]);
     return rows[0] || null;
 }
+
 
 async function skipUserInterviewQuestion(questionId) {
     const query = `

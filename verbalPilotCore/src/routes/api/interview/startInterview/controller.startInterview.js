@@ -11,7 +11,12 @@ const handleStartInterview = async ({ interviewObjectId, UserId, questionPropert
         const hasAccess = await checkUserInterviewAccess(UserId, interviewObjectId);
         const userInterviewCapping = await userInterviewCappingCheck(UserId);
 
-        if(userInterviewCapping && parseInt(userInterviewCapping.total_interviews) >= userInterviewCapping.user_interview_capping) {
+        if (
+            userInterviewCapping &&
+            typeof userInterviewCapping.used_count !== 'undefined' &&
+            typeof userInterviewCapping.user_interview_capping !== 'undefined' &&
+            parseInt(userInterviewCapping.used_count, 10) >= parseInt(userInterviewCapping.user_interview_capping, 10)
+        ) {
             return {
                 Error: true,
                 data: null,
@@ -34,7 +39,8 @@ const handleStartInterview = async ({ interviewObjectId, UserId, questionPropert
             userId: UserId,
             questionProperties,
             answerProperties,
-            status: INTERVIEW_STATUSES.IN_PROGRESS || 'in_progress'
+            status: INTERVIEW_STATUSES.IN_PROGRESS || 'in_progress',
+            cycleId: userInterviewCapping?.cycle_id
         });
 
         const { userInterview, userInterviewMeta } = result;
