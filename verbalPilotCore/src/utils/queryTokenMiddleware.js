@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const sendResponse = require('./responseHandler'); // Adjust the path as needed
-const { UserTokens, User } = require('../../models/index'); // Adjust the path as needed
+const { getUserTokenByTokenAndUserId } = require('../../models/queries/query.user');
 const { responseMessages } = require('../constant/genericConstants/commonConstant');
 const logger = require('./logger');
 /**
@@ -34,13 +34,7 @@ const queryTokenMiddlware = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         context.userId = decoded.id;
 
-        const tokenData = await s.findOne({
-            where: {
-                token: token,
-                userId: decoded.id,
-                isRevoked: false
-            }
-        });
+        const tokenData = await getUserTokenByTokenAndUserId(token, decoded.id);
 
         if (!tokenData) {
             logger.warn('Invalid or revoked token', { ...context });

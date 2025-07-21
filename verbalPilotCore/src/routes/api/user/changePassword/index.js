@@ -1,6 +1,6 @@
 const sendResponse = require('../../../../utils/responseHandler');
-const handleChangePassword = require('./controller');
-const validateChangePassword = require('./validation');
+const handleChangePassword = require('./controller.changePassword');
+const validateChangePassword = require('./validation.changePassword');
 const authMiddleware = require('../../../../utils/authMiddleware');
 const { CHANGE_PASSWORD } = require('../../../../constant/pathConstants');
 const logger = require('../../../../utils/logger');

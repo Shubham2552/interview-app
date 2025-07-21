@@ -483,6 +483,31 @@ async function insertTabSwitch(userInterviewId, userId) {
     try {
         await client.query('BEGIN');
 
+        // Check if the interview is valid, belongs to the user, and is IN_PROGRESS
+        const interviewCheckQuery = `
+            SELECT uim.status
+            FROM user_interview_meta uim
+            INNER JOIN user_interviews ui ON ui.id = uim.user_interview_id
+            WHERE uim.user_interview_id = $1
+              AND ui.user_id = $2
+              AND ui.is_active = TRUE
+              AND ui.is_deleted = FALSE
+              AND uim.is_active = TRUE
+              AND uim.is_deleted = FALSE
+            LIMIT 1;
+        `;
+        const interviewCheckResult = await client.query(interviewCheckQuery, [userInterviewId, userId]);
+        const status = interviewCheckResult.rows[0]?.status;
+
+        if (!status) {
+            await client.query('ROLLBACK');
+            throw new Error('Invalid interview or user does not have access.');
+        }
+        if (status !== 'IN_PROGRESS') {
+            await client.query('ROLLBACK');
+            throw new Error('Tab switch is only allowed for interviews that are IN_PROGRESS.');
+        }
+
         // Insert a new tab switch entry
         const insertTabSwitchQuery = `
             INSERT INTO user_tab_switch_info (

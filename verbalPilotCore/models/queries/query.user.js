@@ -206,6 +206,29 @@ async function getUserForPasswordResetByEmail(email) {
     return rows[0] || null;
 }
 
+async function updateUserPasswordById(userId, hashedPassword) {
+    const query = `
+        UPDATE users
+        SET password = $1, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $2
+        RETURNING id, email;
+    `;
+    const { rows } = await pgQuery(query, [hashedPassword, userId]);
+    return rows[0] || null;
+}
+
+async function getUserPasswordById(userId) {
+    const query = 'SELECT password FROM users WHERE id = $1';
+    const { rows } = await pgQuery(query, [userId]);
+    return rows[0]?.password || null;
+}
+
+async function getUserTokenByTokenAndUserId(token, userId) {
+    const query = `SELECT * FROM user_tokens WHERE token = $1 AND user_id = $2 AND is_revoked = false LIMIT 1`;
+    const { rows } = await pgQuery(query, [token, userId]);
+    return rows[0] || null;
+}
+
 module.exports = {
     getUserProfileById,
     getUserByEmail,
@@ -219,5 +242,8 @@ module.exports = {
     updateUserData,
     setUserVerified,
     getUserVerificationDataById,
-    getUserForPasswordResetByEmail
+    getUserForPasswordResetByEmail,
+    updateUserPasswordById,
+    getUserPasswordById,
+    getUserTokenByTokenAndUserId
 }; 

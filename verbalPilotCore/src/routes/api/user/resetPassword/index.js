@@ -1,6 +1,6 @@
 const { RESET_PASSWORD } = require('../../../../constant/pathConstants');
 const queryTokenMiddleware = require('../../../../utils/queryTokenMiddleware');
-const handleResetPassword = require('./controller');
+const handleResetPassword = require('./controller.resetPassword');
 const sendResponse = require('../../../../utils/responseHandler');
 const { responseMessages } = require('../../../../constant/genericConstants/commonConstant');
 
