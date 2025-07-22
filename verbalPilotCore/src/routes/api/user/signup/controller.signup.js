@@ -55,7 +55,7 @@ const handleSignup = async ({
         expiryDate.setSeconds(expiryDate.getSeconds() + expirySeconds);
 
         // Create user, user_meta, and token in a single transaction
-        const user = await createUserWithMetaAndToken({
+        const { user} = await createUserWithMetaAndToken({
             firstName,
             lastName,
             email,

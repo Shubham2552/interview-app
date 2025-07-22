@@ -49,19 +49,25 @@ async function createUserWithMetaAndToken({
     ipAddress
 }) {
     const client = await pgPool.connect();
-    
+
+    // You can make these dynamic if you like:
+    const planId = 1; // your default or chosen plan
+    const groupId = 1; // fixed as per your requirement
+
     try {
         await client.query('BEGIN');
-        
+
         // 1. Create user
         const userQuery = `
             INSERT INTO users (first_name, last_name, email, password, phone, gender, date_of_birth)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING *
         `;
-        const userResult = await client.query(userQuery, [firstName, lastName, email, password, phone, gender, dateOfBirth]);
+        const userResult = await client.query(userQuery, [
+            firstName, lastName, email, password, phone, gender, dateOfBirth
+        ]);
         const user = userResult.rows[0];
-        
+
         // 2. Create user_meta
         const metaQuery = `
             INSERT INTO user_meta (user_id, is_verified, is_deleted)
@@ -69,18 +75,72 @@ async function createUserWithMetaAndToken({
             RETURNING *
         `;
         await client.query(metaQuery, [user.id, false, false]);
-        
+
         // 3. Create user token
         const tokenQuery = `
             INSERT INTO user_tokens (user_id, token, jwt_expiry, token_type, device_info, ip_address)
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *
         `;
-        await client.query(tokenQuery, [user.id, token, jwtExpiry, 'access', deviceInfo, ipAddress]);
-        
+        await client.query(tokenQuery, [
+            user.id,
+            token,
+            jwtExpiry,
+            'access',
+            deviceInfo,
+            ipAddress
+        ]);
+
+        // 🔥 NEW STEP: create master subscription (360 days)
+        const masterSubQuery = `
+            INSERT INTO user_master_subscriptions
+                (user_id, plan_id, start_date, end_date, status, created_at, updated_at)
+            VALUES ($1, $2, CURRENT_DATE, CURRENT_DATE + INTERVAL '360 days', 'ACTIVE', NOW(), NOW())
+            RETURNING id
+        `;
+        const masterSubRes = await client.query(masterSubQuery, [user.id, planId]);
+        const masterSubId = masterSubRes.rows[0].id;
+
+        // 🔥 NEW STEP: create first 30-day cycle
+        const cycleQuery = `
+            INSERT INTO user_subscription_cycles
+                (master_subscription_id, cycle_start, cycle_end, used_count, created_at, updated_at)
+            VALUES ($1, CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days', 0, NOW(), NOW())
+            RETURNING id
+        `;
+        const cycleRes = await client.query(cycleQuery, [masterSubId]);
+        const cycleId = cycleRes.rows[0].id;
+
+        // 🔥 NEW STEP: create user_group_mapping with group_id = 1
+        const mappingQuery = `
+            INSERT INTO user_group_mapping
+                (name, display_name, description, user_id, group_id, is_active, is_deleted, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, TRUE, FALSE, NOW(), NOW())
+            RETURNING id
+        `;
+        const mappingName = `Group ${groupId} User ${user.id}`;
+        const mappingDisplay = `Group ${groupId} User ${user.id}`;
+        const mappingDesc = 'Auto-mapped group membership';
+        const mappingRes = await client.query(mappingQuery, [
+            mappingName,
+            mappingDisplay,
+            mappingDesc,
+            user.id,
+            groupId
+        ]);
+        const mappingId = mappingRes.rows[0].id;
+
+        // Commit transaction
         await client.query('COMMIT');
-        return user;
-        
+
+        // Optionally return all inserted IDs
+        return {
+            user,
+            masterSubscriptionId: masterSubId,
+            cycleId,
+            groupMappingId: mappingId
+        };
+
     } catch (error) {
         await client.query('ROLLBACK');
         throw error;
@@ -88,6 +148,7 @@ async function createUserWithMetaAndToken({
         client.release();
     }
 }
+
 
 async function insertUserToken({ userId, token, jwtExpiry, tokenType, deviceInfo, ipAddress }) {
     const query = `
