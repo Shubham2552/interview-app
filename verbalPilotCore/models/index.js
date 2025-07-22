@@ -58,8 +58,8 @@ const initializeDatabases = async () => {
         logger.info('PostgreSQL database connection established successfully');
 
         // Initialize MongoDB
-        await connectMongo();
-        logger.info('MongoDB connection established successfully');
+        // await connectMongo();
+        // logger.info('MongoDB connection established successfully');
     } catch (error) {
         logger.error('Database initialization failed:', error);
         throw error;
