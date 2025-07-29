@@ -9,6 +9,7 @@ const { responseMessages, QUESTION_STATUS,   } = require('../../../../constant/g
 const logger = require('../../../../utils/logger');
 const { logError } = require('../../../../utils/errorLogger');
 const AIService = require('../../../../AISDK/classCluster/ClassKit/AIClasses/class.AIService');
+const { getAllQuestionProps } = require('../../../../commonServices/assessment/buildAssessment');
 
 const ResponseMessages = {
     'QUESTION_FETCHED': 'Question fetched successfully',
@@ -41,6 +42,8 @@ const handleInterviewQuestion = async ({ interviewId, userId }) => {
 
         const userQuestionCapping = await userInterviewQuestionCappingCheck(userId, interviewId);
 
+
+        //Question capping check
         if(userQuestionCapping && userQuestionCapping.total_interview_questions >= userQuestionCapping.interview_question_capping ){
             return {
                 Error: true,
@@ -48,25 +51,13 @@ const handleInterviewQuestion = async ({ interviewId, userId }) => {
             }
         }
 
+        //build history of previous question_object props
         const allPreviousQuestions = await getAllInterviewQuestions(interviewId);
         const history = allPreviousQuestions.reduce((acc, curr)=> {
             acc.push(curr.question_object);
             return acc;
         },[]);
 
-        const getAllQuestionProps = (userQuestionProperties = {}, preDefinedQuestionProperties = {}, questionPropsArray =[], history = []) => {
-            const allProps = {...userQuestionProperties, ...preDefinedQuestionProperties, history};
-
-            const missingKeys = questionPropsArray.filter(
-                key => !(key in allProps)
-            );
-            if (missingKeys.length > 0) {
-                logger.warn('Missing keys in QuestionPropsObject:', { missingKeys });
-                throw new Error(`Missing required question properties: ${missingKeys.join(', ')}`);
-            }
-            return allProps;
-            
-        }
         const allProps = getAllQuestionProps(context.question_user_properties, context.meta_question_props, context.prompt_template_properties, history);
 
         const prompt = context.prompt_template_content || '';

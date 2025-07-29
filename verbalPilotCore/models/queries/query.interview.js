@@ -83,8 +83,9 @@ async function getInterviewObjectMeta(userId, interviewObjectId) {
 
 async function checkUserInterviewAccess(userId, interviewObjectId) {
     const query = `
-        SELECT COUNT(*) as access_count
+        SELECT iom.is_synced as "isSynced"
         FROM interview_object io
+        JOIN interview_object_meta iom on io.interview_object_meta_id = iom.id
         JOIN interview_object_user_group_mapping iougm
             ON io.id = iougm.interview_object_id
         JOIN user_group ug
@@ -108,7 +109,7 @@ async function checkUserInterviewAccess(userId, interviewObjectId) {
           AND um.is_active = TRUE AND um.is_deleted = FALSE
     `;
     const { rows } = await pgQuery(query, [userId, interviewObjectId]);
-    return rows[0].access_count > 0;
+    return rows[0];
 }
 
 async function getUserInterviewsByStatus(userId, status) {
@@ -256,12 +257,28 @@ async function getAnswerForQuestion(questionId) {
 }
 
 async function insertUserInterviewQuestion(userInterviewId, questionObject) {
+    let insertValues = "($1, $2)";
+    let queryArguments = [userInterviewId, questionObject];
+
+    if (Array.isArray(questionObject)) {
+        let i = 1;
+        insertValues = questionObject.map((ele, idx) => {
+            return `($${i++},$${(i++)})`;
+        }).join(',');
+
+        queryArguments = questionObject.reduce((prevVal, currVal)=>{
+            prevVal.push(userInterviewId);
+            prevVal.push(currVal);
+            return prevVal;
+        },[]);
+    }
+
     const query = `
-        INSERT INTO user_interview_questions (user_interview_id, question_object)
-        VALUES ($1, $2)
+        INSERT INTO user_interview_questions (user_interview_id, question_object) VALUES
+        ${insertValues}
         RETURNING *
     `;
-    const { rows } = await pgQuery(query, [userInterviewId, JSON.stringify(questionObject)]);
+    const { rows } = await pgQuery(query,queryArguments);
     return rows[0];
 }
 
@@ -287,7 +304,7 @@ async function getFullInterviewContext(userInterviewId, userId) {
             prs.id AS prompt_response_structure_id,
             prs.structure_type AS prompt_response_structure_type,
             prs.structure_content AS prompt_response_structure_content,
-            prs.response_structure AS response_structure,
+            prs.response_structure AS "questionBody",
             p.id AS prompt_id,
             p.template_content AS prompt_template_content,
             p.template_properties AS prompt_template_properties,
@@ -587,11 +604,11 @@ async function userInterviewCappingCheck(userId) {
             m.user_id,
             m.plan_id,
             p.display_name      AS plan_name,
-            p.user_interview_capping,
-            c.id                AS cycle_id,
+            p.user_interview_capping as "userInterviewCapping",
+            c.id                AS "cycleId",
             c.cycle_start,
             c.cycle_end,
-            COUNT(ui.id)        AS used_count,
+            COUNT(ui.id)        AS "userCount",
             (p.user_interview_capping - COUNT(ui.id)) AS remaining_interviews
         FROM user_master_subscriptions m
         JOIN user_interview_plans p
