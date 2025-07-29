@@ -23,7 +23,7 @@ const InterviewQuestionHandler = async (req, res, next) => {
                 user: req.user,
                 error: result.message
             });
-            return sendResponse(res, 400, false, null, result.message);
+            return sendResponse(res, result.status || 400, false, null, result.message);
         }
 
         logger.info('InterviewQuestionHandler request successful', {
@@ -31,7 +31,7 @@ const InterviewQuestionHandler = async (req, res, next) => {
             response: result.data
         });
 
-        sendResponse(res, 200, true, result.data, result.message);
+        sendResponse(res, result.status || 200, true, result.data, result.message);
     } catch (error) {
         logger.error('Unexpected error in login route', {
             interviewId: req.params.id,

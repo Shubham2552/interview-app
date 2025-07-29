@@ -3,17 +3,19 @@ const {
     insertUserInterviewQuestion,
     getFullInterviewContext,
     getAllInterviewQuestions,
-    userInterviewQuestionCappingCheck
+    userInterviewQuestionCappingCheck,
+    getIsSyncedFromUserInterview
 } = require('../../../../../models/queries/query.interview');
-const { responseMessages, QUESTION_STATUS,   } = require('../../../../constant/genericConstants/commonConstant');
+const { responseMessages } = require('../../../../constant/genericConstants/commonConstant');
 const logger = require('../../../../utils/logger');
 const { logError } = require('../../../../utils/errorLogger');
 const AIService = require('../../../../AISDK/classCluster/ClassKit/AIClasses/class.AIService');
 const { getAllQuestionProps } = require('../../../../commonServices/assessment/buildAssessment');
 
 const ResponseMessages = {
-    'QUESTION_FETCHED': 'Question fetched successfully',
-    'ERROR': 'Some error occured'
+    'QUESTION_FETCHED': 'Question fetched successfully!',
+    'QUESTION_COMPLETED':'Questions are completed and you can end the assessment!',
+    'ERROR': 'Some error occured!!'
 }
 
 const handleInterviewQuestion = async ({ interviewId, userId }) => {
@@ -21,16 +23,28 @@ const handleInterviewQuestion = async ({ interviewId, userId }) => {
         logger.info('Starting handleInterviewQuestion process', { interviewId });
 
         // 1. Check for latest question
-        const latestQuestion = await getLatestUserInterviewQuestion(interviewId);
-        if (latestQuestion && latestQuestion.status === QUESTION_STATUS.UNANSWERED) {
+        const unAnsweredQuestion = await getLatestUserInterviewQuestion(interviewId);
+        if (unAnsweredQuestion) {
             return {
                 Error: false,
-                data: [{...latestQuestion.question_object[0], id: latestQuestion.id}],
+                data: [{ ...unAnsweredQuestion.question_object, id: unAnsweredQuestion.id }],
                 message: ResponseMessages.QUESTION_FETCHED,
             }
         }
 
-        // 2. No unanswered question, generate a new one using AIService
+        const assessmentSyncStatus = await getIsSyncedFromUserInterview(userId, interviewId);
+
+        /* If the interview is synced and not question is availaible to answer,
+         then send status interview questions are over, and user should end the interview here. */
+        if (assessmentSyncStatus.isSynced && !unAnsweredQuestion) {
+            return {
+                Error: false,
+                data: null,
+                status: 204,
+                message: ResponseMessages.QUESTION_COMPLETED
+            }
+        }
+
         const context = await getFullInterviewContext(interviewId, userId);
         if (!context) {
             logger.warn('No interview context found', { interviewId });
@@ -44,7 +58,7 @@ const handleInterviewQuestion = async ({ interviewId, userId }) => {
 
 
         //Question capping check
-        if(userQuestionCapping && userQuestionCapping.total_interview_questions >= userQuestionCapping.interview_question_capping ){
+        if (userQuestionCapping && userQuestionCapping.total_interview_questions >= userQuestionCapping.interview_question_capping) {
             return {
                 Error: true,
                 message: `You have reach maximum limit of ${userQuestionCapping.interview_question_capping} questions!`,
@@ -53,10 +67,10 @@ const handleInterviewQuestion = async ({ interviewId, userId }) => {
 
         //build history of previous question_object props
         const allPreviousQuestions = await getAllInterviewQuestions(interviewId);
-        const history = allPreviousQuestions.reduce((acc, curr)=> {
+        const history = allPreviousQuestions.reduce((acc, curr) => {
             acc.push(curr.question_object);
             return acc;
-        },[]);
+        }, []);
 
         const allProps = getAllQuestionProps(context.question_user_properties, context.meta_question_props, context.prompt_template_properties, history);
 
@@ -67,11 +81,12 @@ const handleInterviewQuestion = async ({ interviewId, userId }) => {
         );
 
         logger.info('Inflated Prompt:', { InflatedPrompt });
-       
+
         const Engine = await AIService.getEngine(context.ai_engine_type);
-        let result = await Engine.generateContent({   
+        let result = await Engine.generateContent({
             responseSchema: context.prompt_response_structure_content ? context.prompt_response_structure_content : {},
-            prompt: InflatedPrompt,});
+            prompt: InflatedPrompt,
+        });
 
         logger.info('Generated new question', { result: result.text });
         result = JSON.parse(result.text);
@@ -92,11 +107,11 @@ const handleInterviewQuestion = async ({ interviewId, userId }) => {
                 }
             });
         }
-  
-       const questionData =  await insertUserInterviewQuestion(interviewId, context.response_structure);
+
+        const questionData = await insertUserInterviewQuestion(interviewId, context.response_structure);
         return {
             Error: false,
-            data: [{...context.response_structure[0], id: questionData.id}],
+            data: [{ ...context.response_structure[0], id: questionData.id }],
             message: responseMessages.SUCCESS_CONSTANTS.INTERVIEW_OBJECT_META_FETCHED
         };
     } catch (error) {

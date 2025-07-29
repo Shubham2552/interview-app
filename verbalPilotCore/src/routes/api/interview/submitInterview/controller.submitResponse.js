@@ -3,7 +3,9 @@ const {
     insertUserInterviewAnswer,
     getLatestUserInterviewQuestion,
     getFullResponseInterviewContext,
-    skipUserInterviewQuestion
+    skipUserInterviewQuestion,
+    getIsSyncedFromUserInterview,
+    getQuestionStatus
 } = require('../../../../../models/queries/query.interview');
 const { responseMessages, QUESTION_STATUS } = require('../../../../constant/genericConstants/commonConstant');
 const logger = require('../../../../utils/logger');
@@ -16,6 +18,11 @@ const handleSubmitResponse = async ({ userInterviewId, answer, status, interview
 
         //Get User context
         const context = await getFullResponseInterviewContext(userInterviewId, userId);
+        const questionStatus = await getQuestionStatus(interviewQuestionId);
+        if (!questionStatus) return {
+            Error: true,
+            message: 'Already answered or Invalid Question!',
+        };
 
         //Check valid context
         if (!context) {
@@ -27,9 +34,9 @@ const handleSubmitResponse = async ({ userInterviewId, answer, status, interview
             };
         }
 
-        if(status === QUESTION_STATUS.SKIPPED){
+        if (status === QUESTION_STATUS.SKIPPED) {
             const skipQuestion = await skipUserInterviewQuestion(interviewQuestionId);
-            if(skipQuestion) {
+            if (skipQuestion) {
                 return {
                     Error: false,
                     message: 'Question skipped!',
@@ -42,17 +49,26 @@ const handleSubmitResponse = async ({ userInterviewId, answer, status, interview
             }
         }
 
-
-        let question = await getLatestUserInterviewQuestion(userInterviewId);
-        question = question?.question_object[0]?.properties?.content;
-
         let responseData = null;
         //Transform string answer to object
         if (typeof answer === 'string') {
             const answerObject = { answer };
-            responseData =  await insertUserInterviewAnswer({ interviewQuestionId, answerObject });
+            responseData = await insertUserInterviewAnswer({ interviewQuestionId, answerObject });
 
         }
+
+        const assessmentSyncStatus = await getIsSyncedFromUserInterview(userId, userInterviewId);
+
+        if (assessmentSyncStatus.isSynced) {
+            return {
+                Error: false,
+                message: 'Response submitted successfully',
+                data: null
+            }
+        }
+
+        let question = await getLatestUserInterviewQuestion(userInterviewId);
+        question = question?.question_object[0]?.properties?.content;
 
         //Funtion to create merge all props and pass to prompt inflater
         const populateMeta = ({ context, question, answer }) => {
@@ -111,7 +127,7 @@ const handleSubmitResponse = async ({ userInterviewId, answer, status, interview
             interviewResponseId: responseData.id,
             feedbackObject: result,
         })
-        
+
         console.log('Template before:', context.feedbackResponseStructureObject);
         console.log('Result:', result);
         console.log('typeof context.feedbackResponseStructureObject:', typeof context.feedbackResponseStructureObject);

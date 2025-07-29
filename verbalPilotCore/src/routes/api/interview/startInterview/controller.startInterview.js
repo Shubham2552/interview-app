@@ -36,8 +36,8 @@ const AIQuestionSetBuilder = async (userId, userInterviewId) => {
     });
     let AIGeneratedQuestionSet = JSON.parse(AIResponse.text);
     const MergedQuestionSet = AIGeneratedQuestionSet.map(ele => {
-        context.questionBody[0].properties = ele;
-        return context.questionBody[0];
+        const populatedQuestionBody = {...context.questionBody[0], properties: ele}
+        return populatedQuestionBody;
     })
     return MergedQuestionSet;
 }

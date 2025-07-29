@@ -1,3 +1,4 @@
+const { QUESTION_STATUS } = require('../../src/constant/genericConstants/commonConstant');
 const { pgQuery, pgPool } = require('../index');
 
 async function getAvailableInterviews(userId) {
@@ -232,11 +233,12 @@ async function getInterviewWithCategoryAndMeta(interviewId) {
 
 async function getLatestUserInterviewQuestion(userInterviewId) {
     const query = `
-        SELECT * FROM user_interview_questions
-        WHERE user_interview_id = $1
+        SELECT * FROM user_interview_questions uiq
+        WHERE uiq.user_interview_id = $1
+          AND status='${QUESTION_STATUS.UNANSWERED}'
           AND is_active = TRUE
           AND is_deleted = FALSE
-        ORDER BY id DESC
+          ORDER BY uiq.id
         LIMIT 1
     `;
     const { rows } = await pgQuery(query, [userInterviewId]);
@@ -266,11 +268,11 @@ async function insertUserInterviewQuestion(userInterviewId, questionObject) {
             return `($${i++},$${(i++)})`;
         }).join(',');
 
-        queryArguments = questionObject.reduce((prevVal, currVal)=>{
+        queryArguments = questionObject.reduce((prevVal, currVal) => {
             prevVal.push(userInterviewId);
             prevVal.push(currVal);
             return prevVal;
-        },[]);
+        }, []);
     }
 
     const query = `
@@ -278,7 +280,7 @@ async function insertUserInterviewQuestion(userInterviewId, questionObject) {
         ${insertValues}
         RETURNING *
     `;
-    const { rows } = await pgQuery(query,queryArguments);
+    const { rows } = await pgQuery(query, queryArguments);
     return rows[0];
 }
 
@@ -695,6 +697,26 @@ async function skipUserInterviewQuestion(questionId) {
     return rows[0] || null;
 }
 
+async function getIsSyncedFromUserInterview(UserId, userInterviewId) {
+    const query = `
+        SELECT iom.is_synced as "isSynced"
+            FROM user_interviews ui
+                JOIN interview_object io ON ui.interview_object_id = io.id
+                JOIN interview_object_meta iom ON io.interview_object_meta_id = iom.id
+            WHERE ui.user_id = $1 AND ui.id = $2;
+
+    `
+    const { rows } = await pgQuery(query, [UserId, userInterviewId]);
+    return rows[0] || null;
+}
+
+async function getQuestionStatus(questionId) {
+    const query = `SELECT * FROM user_interview_questions uiq WHERE uiq.id = $1 and status = $2`;
+
+    const { rows } = await pgQuery(query, [questionId, QUESTION_STATUS.UNANSWERED]);
+    return rows[0] || null;
+}
+
 module.exports = {
     getAvailableInterviews,
     getInterviewObjectMeta,
@@ -716,5 +738,7 @@ module.exports = {
     userInterviewCappingCheck,
     interviewUserProperties,
     userInterviewQuestionCappingCheck,
-    skipUserInterviewQuestion
+    skipUserInterviewQuestion,
+    getIsSyncedFromUserInterview,
+    getQuestionStatus
 }; 
