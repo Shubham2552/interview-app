@@ -1,3 +1,6 @@
+const AIService = require('../../AISDK/classCluster/ClassKit/AIClasses/class.AIService');
+const logger = require('../../utils/logger');
+
 module.exports.getAllQuestionProps = (userQuestionProperties = {}, preDefinedQuestionProperties = {}, questionPropsArray = [], history = []) => {
     const allProps = { ...userQuestionProperties, ...preDefinedQuestionProperties, history };
 
@@ -11,3 +14,12 @@ module.exports.getAllQuestionProps = (userQuestionProperties = {}, preDefinedQue
     return allProps;
 
 }
+
+module.exports.buildPromptFromContext = ({prompt, userDefinedProperties, preDefinedProperties, propertiesArray}) => {
+    const allProps = this.getAllQuestionProps(userDefinedProperties, preDefinedProperties, propertiesArray, []);
+    return AIService.populatePromptTemplate(
+        prompt,
+        allProps
+    );
+}
+

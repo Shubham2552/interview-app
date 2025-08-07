@@ -1,4 +1,4 @@
-const { QUESTION_STATUS } = require('../../src/constant/genericConstants/commonConstant');
+const { QUESTION_STATUS, INTERVIEW_STATUSES } = require('../../src/constant/genericConstants/commonConstant');
 const { pgQuery, pgPool } = require('../index');
 
 async function getAvailableInterviews(userId) {
@@ -285,7 +285,7 @@ async function insertUserInterviewQuestion(userInterviewId, questionObject) {
 }
 
 // Keep the original getFullInterviewContext
-async function getFullInterviewContext(userInterviewId, userId) {
+async function getFullInterviewContext(userInterviewId, userId, status = INTERVIEW_STATUSES.COMPLETED) {
     const query = `
         SELECT
             ui.id AS user_interview_id,
@@ -329,15 +329,15 @@ async function getFullInterviewContext(userInterviewId, userId) {
           AND uim.is_deleted = FALSE
           AND io.is_active = TRUE
           AND io.is_deleted = FALSE
-          AND uim.status <> 'COMPLETED'
+          AND uim.status <> $3
         LIMIT 1
     `;
-    const { rows } = await pgQuery(query, [userInterviewId, userId]);
+    const { rows } = await pgQuery(query, [userInterviewId, userId, status]);
     return rows[0] || null;
 }
 
 // Add the new getFullResponseInterviewContext as a separate function
-async function getFullResponseInterviewContext(userInterviewId, userId) {
+async function getFullResponseInterviewContext(userInterviewId, userId, status = INTERVIEW_STATUSES.COMPLETED) {
     const query = `
        SELECT
             ui.id AS user_interview_id,
@@ -393,10 +393,10 @@ async function getFullResponseInterviewContext(userInterviewId, userId) {
           AND uim.is_deleted = FALSE
           AND io.is_active = TRUE
           AND io.is_deleted = FALSE
-          AND uim.status <> 'COMPLETED'
+          AND uim.status <> $3
         LIMIT 1
     `;
-    const { rows } = await pgQuery(query, [userInterviewId, userId]);
+    const { rows } = await pgQuery(query, [parseInt(userInterviewId), userId, status]);
     return rows[0] || null;
 }
 
@@ -576,24 +576,22 @@ async function insertTabSwitch(userInterviewId, userId) {
 }
 
 async function userInterviewResult(userInterviewId, userId) {
-    const query = `select ui.id,
+    const query = `
+    SELECT ui.id,
        uiq.question_object,
-       uia.answer_object,
-       uirf.feedback_object
-        from user_interviews ui
-            inner join user_interview_questions uiq on ui.id = uiq.user_interview_id
-            inner join user_interview_answers uia on uiq.id = uia.interview_question_id
-            inner join user_interview_responses_feedback uirf on uia.id = uirf.interview_response_id
-        where ui.id = $1
-        and ui.user_id = $2
-        and ui.is_active = true
-        and ui.is_deleted = false
-        and uiq.is_active = true
-        and uiq.is_deleted = false
-        and uia.is_active = true
-        and uia.is_deleted = false
-        and uirf.is_active = true
-        and uirf.is_deleted = false;`
+       uia.answer_object
+        FROM user_interviews ui
+            JOIN user_interview_questions uiq on ui.id = uiq.user_interview_id
+            JOIN user_interview_answers uia on uiq.id = uia.interview_question_id
+        WHERE ui.id = $1
+        AND ui.user_id = $2
+        AND ui.is_active = true
+        AND ui.is_deleted = false
+        AND uiq.is_active = true
+        AND uiq.is_deleted = false
+        AND uia.is_active = true
+        AND uia.is_deleted = false;
+        `
 
     const { rows } = await pgQuery(query, [userInterviewId, userId]);
     return rows;
@@ -717,6 +715,51 @@ async function getQuestionStatus(questionId) {
     return rows[0] || null;
 }
 
+async function AssessmentDataFromUserInterview(userId, userInterviewId) {
+    const query = `SELECT
+        ui.id as "interviewId",
+        uiq.question_object as "questionObject",
+        uia.answer_object as "userAnswerObject",
+        uiq.status as "questionStatus"
+        FROM user_interviews ui
+        JOIN public.user_interview_questions uiq
+        ON ui.id = uiq.user_interview_id
+        LEFT JOIN public.user_interview_answers uia
+        ON uiq.id = uia.interview_question_id
+        WHERE
+        ui.is_active = true AND
+        uiq.is_active = true AND
+        ui.is_deleted = false AND
+        uiq.is_deleted = false AND
+        ui.user_id = $1 AND
+        ui.id = $2
+        `
+    const { rows } = await pgQuery(query, [userId, userInterviewId]);
+    return rows || null;
+
+}
+
+async function storeUserAssessment(userInterviewId, assessmentData) {
+    const query = `
+        INSERT INTO user_assessment_report(user_interview_id, interview_report_object) 
+        values($1, $2)
+        `;
+
+    const { rows } = await pgQuery(query, [userInterviewId, assessmentData]);
+    return rows[0] || null;
+}
+
+async function getUserAssessmentReport(userId, userInterviewId) {
+    const query = `
+    SELECT interview_report_object as "userAssessmentReport"
+        FROM user_assessment_report uar
+        JOIN user_interviews ui on uar.user_interview_id = ui.id
+        WHERE ui.user_id = $1 AND uar.user_interview_id = $2; 
+    `
+    const { rows } = await pgQuery(query, [userId, userInterviewId]);
+    return rows[0] || null;
+}
+
 module.exports = {
     getAvailableInterviews,
     getInterviewObjectMeta,
@@ -740,5 +783,8 @@ module.exports = {
     userInterviewQuestionCappingCheck,
     skipUserInterviewQuestion,
     getIsSyncedFromUserInterview,
-    getQuestionStatus
+    getQuestionStatus,
+    AssessmentDataFromUserInterview,
+    storeUserAssessment,
+    getUserAssessmentReport
 }; 

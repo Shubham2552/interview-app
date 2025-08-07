@@ -7,7 +7,7 @@ const {
     getIsSyncedFromUserInterview,
     getQuestionStatus
 } = require('../../../../../models/queries/query.interview');
-const { responseMessages, QUESTION_STATUS } = require('../../../../constant/genericConstants/commonConstant');
+const { responseMessages, QUESTION_STATUS, INTERVIEW_STATUSES } = require('../../../../constant/genericConstants/commonConstant');
 const logger = require('../../../../utils/logger');
 const { logError } = require('../../../../utils/errorLogger');
 const AIService = require('../../../../AISDK/classCluster/ClassKit/AIClasses/class.AIService');
@@ -17,7 +17,7 @@ const handleSubmitResponse = async ({ userInterviewId, answer, status, interview
         logger.info('Starting handleSubmitResponse process', { userInterviewId, status });
 
         //Get User context
-        const context = await getFullResponseInterviewContext(userInterviewId, userId);
+        const context = await getFullResponseInterviewContext(userInterviewId, userId, INTERVIEW_STATUSES.COMPLETED);
         const questionStatus = await getQuestionStatus(interviewQuestionId);
         if (!questionStatus) return {
             Error: true,

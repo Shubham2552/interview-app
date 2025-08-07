@@ -1,6 +1,6 @@
 const sendResponse = require('../../../../utils/responseHandler');
 const handleInterviewResult = require('./controller.interviewResult');
-const { INTERVIEW_RESULT } = require('../../../../constant/pathConstants');
+const { ASSESSMENT_ANSWERS } = require('../../../../constant/pathConstants');
 const logger = require('../../../../utils/logger');
 
 const interviewResultHandler = async (req, res, next) => {
@@ -29,8 +29,8 @@ const interviewResultHandler = async (req, res, next) => {
 };
 
 module.exports = {
-    path: INTERVIEW_RESULT.path,
-    method: INTERVIEW_RESULT.method,
+    path: ASSESSMENT_ANSWERS.path,
+    method: ASSESSMENT_ANSWERS.method,
     handler: interviewResultHandler,
     auth: true
 }; 

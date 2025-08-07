@@ -10,6 +10,10 @@ const handleInterviewResult = async ({ userInterviewId, userId }) => {
 
         const userInterviewResultRows = await userInterviewResult(userInterviewId, userId);
         
+        const userAssessmentAnswers = userInterviewResultRows.map(ele=> {
+            return {id: ele.id, ...ele.question_object, properties: {...ele.question_object.properties, ...ele.answer_object}}
+        })
+
         if(!userInterviewResultRows) {
             logger.info('User Interview Result Controller error...', { userId , userInterviewId, userInterviewResultRows });
             return {
@@ -23,7 +27,7 @@ const handleInterviewResult = async ({ userInterviewId, userId }) => {
 
         return {
             Error: false,
-            data: userInterviewResultRows,
+            data: userAssessmentAnswers,
             message: 'Successful in retrieving result.'
         };
     } catch (error) {
