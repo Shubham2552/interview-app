@@ -9,7 +9,9 @@ const pgPool = new Pool({
   database: process.env.POSTGRES_DB,
   password: process.env.POSTGRES_PASSWORD,
   port: process.env.POSTGRES_PORT ? parseInt(process.env.POSTGRES_PORT) : 5432,
+  ssl: process.env.POSTGRES_SSL === 'true' ? { rejectUnauthorized: false } : false
 });
+
 
 const pgQuery = (text, params) => pgPool.query(text, params);
 
