@@ -1,5 +1,5 @@
 const sendResponse = require('../../../../utils/responseHandler');
-const handleInterviewResult = require('./controller.interviewResult');
+const handleInterviewResult = require('./controller.assessmentAnswers');
 const { ASSESSMENT_ANSWERS } = require('../../../../constant/pathConstants');
 const logger = require('../../../../utils/logger');
 

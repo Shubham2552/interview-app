@@ -22,7 +22,11 @@ const AIQuestionSetBuilder = async (userId, userInterviewId) => {
         };
     }
 
-    const allProps = getAllQuestionProps(context.question_user_properties, context.meta_question_props, context.prompt_template_properties, []);
+    const allProps = getAllQuestionProps(
+        context.question_user_properties, 
+        context.meta_question_props, 
+        context.prompt_template_properties, 
+        []);
     const prompt = context.prompt_template_content || '';
     const InflatedPrompt = AIService.populatePromptTemplate(
         prompt,

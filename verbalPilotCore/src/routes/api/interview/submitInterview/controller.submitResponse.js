@@ -1,5 +1,5 @@
 const {
-    insertUserInterviewResponseFeedback,
+    insertUserAssessmentAnswerEvaluation,
     insertUserInterviewAnswer,
     getLatestUserInterviewQuestion,
     getFullResponseInterviewContext,
@@ -123,7 +123,7 @@ const handleSubmitResponse = async ({ userInterviewId, answer, status, interview
         }
 
         //Inserting the feedback response
-        const feedbackResponseData = await insertUserInterviewResponseFeedback({
+        const feedbackResponseData = await insertUserAssessmentAnswerEvaluation({
             interviewResponseId: responseData.id,
             feedbackObject: result,
         })

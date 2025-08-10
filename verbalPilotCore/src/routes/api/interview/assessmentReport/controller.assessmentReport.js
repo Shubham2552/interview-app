@@ -1,11 +1,5 @@
 const {
-    insertUserInterviewResponseFeedback,
-    insertUserInterviewAnswer,
-    getLatestUserInterviewQuestion,
     getFullResponseInterviewContext,
-    skipUserInterviewQuestion,
-    getIsSyncedFromUserInterview,
-    getQuestionStatus,
     getFullInterviewContext,
     AssessmentDataFromUserInterview,
     storeUserAssessment,

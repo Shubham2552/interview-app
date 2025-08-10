@@ -11,7 +11,7 @@ const handleInterviewResult = async ({ userInterviewId, userId }) => {
         const userInterviewResultRows = await userInterviewResult(userInterviewId, userId);
         
         const userAssessmentAnswers = userInterviewResultRows.map(ele=> {
-            return {id: ele.id, ...ele.question_object, properties: {...ele.question_object.properties, ...ele.answer_object}}
+            return {id: ele.id, ...ele.question_object, properties: {...ele.question_object.properties, ...ele.answer_object,  questionId: ele.questionId}}
         })
 
         if(!userInterviewResultRows) {

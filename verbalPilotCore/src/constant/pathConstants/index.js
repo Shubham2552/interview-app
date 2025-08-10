@@ -20,8 +20,10 @@ module.exports = [
     ['SUBMIT_RESPONSE', '/submit-response/:id', 'post'],
     ['END_INTERVIEW', '/end-interview/:id', 'get'],
     ['TAB_SWITCHES', '/tab-switch/:id','get'],
-    ['INTERVIEW_RESULT', '/result/:id', 'get'],
+    ['ASSESSMENT_ANSWERS', '/assessment-answers/:id', 'get'],
     ['INTEVIEW_DETAILS', '/details/:id', 'get'],
+    ['GENERATE_ASSESSMENT_REPORT', '/assessment-report/:id','get'],
+    ['ANSWER_ANALYSIS', '/answer-analysis/:questionid', 'get'],
 
     ['GET_USER_INTERVIEWS', '/user-interviews', 'get'],
     ['GET_USER_INTERVIEW_META', '/user-interview-meta/:id', 'get'],
