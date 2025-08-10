@@ -44,12 +44,12 @@ const handleAnswerAnalysis = async ({ userAssessmentQuestionId, userId }) => {
       userAssessmentQuestionId
     );
 
-    if(userAnswer.answerAnalysisObject) {
-        return {
-            Error: false,
-            message: "API Success! Analysis for the given question!",
-            data: userAnswer.answerAnalysisObject
-        }
+    if (userAnswer.answerAnalysisObject) {
+      return {
+        Error: false,
+        message: "API Success! Analysis for the given question!",
+        data: userAnswer.answerAnalysisObject,
+      };
     }
 
     const assessmentQuestionContext = await getFullInterviewContext(
@@ -109,70 +109,6 @@ const handleAnswerAnalysis = async ({ userAssessmentQuestionId, userId }) => {
       message: "API Success! Analysis for the given question!",
       data: mappedAnswerAnalysis,
     };
-    const context = await getFullInterviewContext(
-      userInterviewId,
-      userId,
-      INTERVIEW_STATUSES.IN_PROGRESS
-    );
-    const assessmentAnswerContext = await getFullResponseInterviewContext(
-      userInterviewId,
-      userId,
-      INTERVIEW_STATUSES.IN_PROGRESS
-    );
-    if (!context)
-      return {
-        Error: true,
-        message: "Invalid Assessment!",
-      };
-
-    const userAssessmentReport = await getUserAssessmentReport(
-      userId,
-      userInterviewId
-    );
-
-    if (userAssessmentReport)
-      return {
-        Error: false,
-        message: "API Success! User Assessment Report Retrieved!",
-        data: mapAssessmentReport(
-          userAssessmentReport.userAssessmentReport,
-          assessmentAnswerContext.feedbackResponseStructureObject
-        ),
-      };
-
-    const userAssessmentData = await AssessmentDataFromUserInterview(
-      userId,
-      userInterviewId
-    );
-
-    /*         const assessmentReportPrompt = buildPromptFromContext({
-            prompt: assessmentAnswerContext.feedbackTemplate,
-            preDefinedProperties: assessmentAnswerContext.feedbackPreDefinedObject,
-            userDefinedProperties: {
-                questionPrompt,
-                userAssessmentData,
-                ...assessmentAnswerContext.feedbackUserProperties
-            },
-            propertiesArray: assessmentAnswerContext.feedbackTemplateProperties
-        }) */
-
-    const aiEngineType =
-      assessmentAnswerContext.feedbackAIEngineType || "default";
-    let responseSchema =
-      assessmentAnswerContext.feedbackResponseStructureContent
-        ? assessmentAnswerContext.feedbackResponseStructureContent
-        : {};
-
-    const storeAssessmentResult = await storeUserAssessment(
-      userInterviewId,
-      result
-    );
-
-    return {
-      Error: false,
-      data: result,
-      message: "API Sucess!",
-    };
   } catch (error) {
     logError(error, __filename, { userAssessmentQuestionId });
     throw error; // Let the global error handler handle it
@@ -180,11 +116,3 @@ const handleAnswerAnalysis = async ({ userAssessmentQuestionId, userId }) => {
 };
 
 module.exports = handleAnswerAnalysis;
-
-/* [{
-
-},{
-
-},{
-    
-}] */
