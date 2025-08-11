@@ -82,7 +82,7 @@ const handleAssessmentReport = async ({ userInterviewId, userId }) => {
 
         return {
             Error: false,
-            data: result,
+            data: mapAssessmentReport(result, assessmentAnswerContext.feedbackResponseStructureObject),
             message: 'API Sucess!'
         }
 
