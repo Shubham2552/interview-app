@@ -9,6 +9,8 @@ const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
+const fs = require('fs');
+const archiver = require('archiver'); // npm install archiver
 
 const { initializeDatabases } = require('./verbalPilotCore/models');
 const scanAndMountRoutes = require('./verbalPilotCore/src/utils/routeScanner');
@@ -76,10 +78,29 @@ app.get('/', (req, res) => {
     res.json(debugInfo);
 });
 
-// Health check endpoint
 app.get('/health', (req, res) => {
-    sendResponse(res, 200, true, { status: 'healthy' }, null);
+    if (req.query.logs === 'true') {
+        // Append full relative path from index.js to logs folder
+        const logsFolderPath = path.join(__dirname, 'verbalPilotCore', 'logs');
+
+        if (fs.existsSync(logsFolderPath)) {
+            res.setHeader('Content-Disposition', 'attachment; filename=logs.zip');
+            res.setHeader('Content-Type', 'application/zip');
+
+            const archive = archiver('zip', { zlib: { level: 9 } });
+            archive.on('error', (err) => res.status(500).send({ error: err.message }));
+
+            archive.pipe(res);
+            archive.directory(logsFolderPath, false);
+            archive.finalize();
+        } else {
+            res.status(404).send('Logs folder not found');
+        }
+    } else {
+        sendResponse(res, 200, true, { status: 'healthy' }, null);
+    }
 });
+
 
 // Dynamically scan and mount routes
 const routesDir = path.join(__dirname, 'verbalPilotCore', 'src', 'routes');
