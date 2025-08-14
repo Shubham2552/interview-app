@@ -61,6 +61,20 @@ app.use(cors({
 // Request logging
 app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 
+app.get('/', (req, res) => {
+    const debugInfo = {
+        status: 'running',
+        timestamp: new Date(),
+        nodeVersion: process.version,
+        platform: os.platform(),
+        cpuCores: os.cpus().length,
+        memoryUsageMB: (process.memoryUsage().rss / 1024 / 1024).toFixed(2),
+        uptimeSeconds: process.uptime().toFixed(0),
+        environment: process.env.NODE_ENV || 'development'
+    };
+    res.json(debugInfo);
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
     sendResponse(res, 200, true, { status: 'healthy' }, null);
