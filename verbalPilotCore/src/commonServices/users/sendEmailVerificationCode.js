@@ -44,7 +44,7 @@ const updateEmailVerification = async (user, type = EMAIL_TEMPLATES.keys.SIGNUP)
 
         logger.info('Email sending triggered, continuing execution...');
 
-        return emailResponse;
+        return true;
     } catch (error) {
         logger.error('Error in email verification process', {
             ...context, error: error.message, stack: error.stack
