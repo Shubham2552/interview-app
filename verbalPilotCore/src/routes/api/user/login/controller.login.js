@@ -14,6 +14,7 @@ const handleLogin = async ({email, password, deviceInfo, ipAddress}) => {
 
         const existingUser = await getUserByEmail(email);
 
+        
         if (!existingUser) {
             logger.warn('Login failed: Email not found', { ...context });
             return { Error: true, message: responseMessages.ERROR_CONSTANTS.EMAIL_NOT_FOUND };

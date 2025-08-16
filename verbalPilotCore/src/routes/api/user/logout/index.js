@@ -1,6 +1,6 @@
 const sendResponse = require('../../../../utils/responseHandler');
 const authMiddleware = require('../../../../utils/authMiddleware');
-const { handleLogout } = require('./controller');
+const { handleLogout } = require('./controller/index');
 const { LOGOUT } = require('../../../../constant/pathConstants');
 
 const logoutHandler = async (req, res, next) => {

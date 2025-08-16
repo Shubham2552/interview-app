@@ -24,6 +24,7 @@ module.exports = [
     ['INTEVIEW_DETAILS', '/details/:id', 'get'],
     ['GENERATE_ASSESSMENT_REPORT', '/assessment-report/:id','get'],
     ['ANSWER_ANALYSIS', '/answer-analysis/:questionid', 'get'],
+    ['GOOGLE_AUTH_CALLBACK', '/auth/google/callback', 'POST'],
 
     ['GET_USER_INTERVIEWS', '/user-interviews', 'get'],
     ['GET_USER_INTERVIEW_META', '/user-interview-meta/:id', 'get'],
