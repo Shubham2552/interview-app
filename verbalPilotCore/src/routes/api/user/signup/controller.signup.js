@@ -36,26 +36,13 @@ const handleSignup = async ({
 
         // Parse JWT_EXPIRY to get seconds
         const expirySeconds = parseInt(JWT_EXPIRY) || 86400;
-
-        // Generate JWT token
-        const token = jwt.sign(
-            { 
-                id: null, // Will be set after user creation
-                isVerified: false, 
-                email 
-            }, 
-            JWT_SECRET, 
-            { 
-                expiresIn: JWT_EXPIRY 
-            }
-        );
         
         // Calculate expiry date
         const expiryDate = new Date();
         expiryDate.setSeconds(expiryDate.getSeconds() + expirySeconds);
 
         // Create user, user_meta, and token in a single transaction
-        const { user} = await createUserWithMetaAndToken({
+        const { user, token} = await createUserWithMetaAndToken({
             firstName,
             lastName,
             email,
@@ -63,7 +50,6 @@ const handleSignup = async ({
             gender,
             dateOfBirth,
             phone,
-            token,
             jwtExpiry: expiryDate,
             deviceInfo,
             ipAddress

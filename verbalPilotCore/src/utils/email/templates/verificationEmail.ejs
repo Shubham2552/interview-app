@@ -40,6 +40,23 @@
             letter-spacing: 2px;
             text-align: center;
         }
+        .welcome-box {
+            background-color: #f3f8ff;
+            border-left: 4px solid #1976d2;
+            padding: 18px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            margin-top: 18px;
+            padding: 12px 24px;
+            background-color: #1976d2;
+            color: #fff !important;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
         .email-footer {
             text-align: center;
             padding: 14px;
@@ -52,15 +69,22 @@
 <body>
     <div class="email-container">
         <div class="email-header">
-            <h1>Welcome to Our Platform, <%= name %>!</h1>
+            <h1>Welcome, <%= name %>!</h1>
         </div>
         <div class="email-body">
-            <p>Thank you for signing up! We're excited to have you on board.</p>
-            <p>Please use the verification code below to complete your registration:</p>
-            <div class="verification-code">
-                <%= verificationCode %>
-            </div>
-            <p>If you did not sign up for this account, please ignore this email.</p>
+            <% if (!isVerified) { %>
+                <p>Thank you for signing up! We're excited to have you on board.</p>
+                <p>Please use the code below to get started:</p>
+                <div class="verification-code">
+                    <%= verificationCode %>
+                </div>
+                <p>If you did not sign up for this account, you can safely ignore this email.</p>
+            <% } else { %>
+                <div class="welcome-box">
+                    <p>🎉 We’re thrilled to have you join our community!</p>
+                    <p>Get ready to explore all the features our platform has to offer.</p>
+                </div>
+            <% } %>
         </div>
         <div class="email-footer">
             <p>&copy; 2025 Our Platform. All rights reserved.</p>

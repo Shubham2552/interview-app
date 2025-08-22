@@ -3,6 +3,7 @@ const {
   getFullInterviewContext,
   getUserAssessmentQuestionAnswer,
   insertUserAssessmentAnswerEvaluation,
+  userInterviewCappingCheck,
 } = require("../../../../../models/queries/query.interview");
 const {
   responseMessages,
@@ -38,6 +39,22 @@ const handleAnswerAnalysis = async ({ userAssessmentQuestionId, userId }) => {
       userAssessmentQuestionId,
       userId,
     });
+
+    const userCapping = await userInterviewCappingCheck(userId);
+
+    if(userCapping && !userCapping.hasAnswerAnalysis) {
+
+      logger.warn("User has no access to answer analysis", {
+        userId,
+        userCapping,
+      });
+
+      return {
+        Error: true,
+        message: 'API Failed! You do not have access to answer analysis.',
+        status: 402,
+      };
+    }
 
     const userAnswer = await getUserAssessmentQuestionAnswer(
       userId,

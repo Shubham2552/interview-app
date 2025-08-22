@@ -1,28 +1,34 @@
-const {verificationCodeTypes, EMAIL_TEMPLATES} = require('../../constant/genericConstants/commonConstant');
+const { verificationCodeTypes, EMAIL_TEMPLATES } = require('../../constant/genericConstants/commonConstant');
 const sendEmail = require('../../utils/email/emailSender');
 const logger = require('../../utils/logger');
-const {updateUserVerificationCode} = require('../../../models/queries/query.user');
+const { updateUserVerificationCode } = require('../../../models/queries/query.user');
 
 
-const updateEmailVerification = async (user, type = EMAIL_TEMPLATES.keys.SIGNUP) => {
+const updateEmailVerification = async (user, type = EMAIL_TEMPLATES.keys.SIGNUP, isVerified = false) => {
     const context = {
         userId: user.id, email: user.email, emailType: type
     };
 
+    let verificationCode = null;
     try {
-        logger.info('Generating verification code', {...context});
-        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+        //If user is not verified, generate a verification code
+        if (!isVerified) {
+            logger.info('Generating verification code', { ...context });
+            verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // Update verification code in database using raw SQL
-        await updateUserVerificationCode(user.id, verificationCode);
-        logger.info('Verification code updated in database', {...context});
-
+            // Update verification code in database using raw SQL
+            await updateUserVerificationCode(user.id, verificationCode);
+            logger.info('Verification code updated in database', { ...context });
+        }
+        
         sendEmail({
             to: user.email,
             subject: EMAIL_TEMPLATES[type].subject,
             template: EMAIL_TEMPLATES[type].templateName,
             templateData: {
-                name: `${user.first_name} ${user.last_name}`, verificationCode,
+                name: `${user.first_name} ${user.last_name}`,
+                verificationCode,
+                isVerified,
             },
         })
             .then((emailResponse) => {

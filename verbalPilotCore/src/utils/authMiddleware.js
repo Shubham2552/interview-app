@@ -36,21 +36,13 @@ const authMiddleware = async (req, res, next) => {
         context.email = decoded.email;
 
         // Check if the token exists and is not revoked
-        const tokenData = await validateUserToken(token, decoded.id);
+        const tokenData = await validateUserToken(token, decoded.email);
         if (!tokenData) {
             logger.warn('Invalid or revoked token', { ...context });
-            return sendResponse(res, 403, false, null, 'Token is invalid or has been revoked.');
-        }
-
-        // Check if the user exists and is not deleted
-        const user = await getUserByEmail(decoded.email);
-        if (!user) {
-            logger.warn('User not found or deleted', { ...context });
-            return sendResponse(res, 403, false, null, 'User account not found or has been deleted.');
+            return sendResponse(res, 401, false, null, 'Token is invalid or has been revoked.');
         }
 
         console.log('Token Data:', tokenData);
-        console.log('User Data:', user);
 
         logger.info('Authentication successful', { ...context });
         req.user = decoded;
@@ -62,7 +54,7 @@ const authMiddleware = async (req, res, next) => {
             error: err.message,
             stack: err.stack
         });
-        sendResponse(res, 403, false, null, 'Invalid token.');
+        sendResponse(res, 401, false, null, 'Invalid token.');
     }
 };
 

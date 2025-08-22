@@ -1,4 +1,6 @@
 const { pgQuery, pgPool } = require('../index');
+const { JWT_SECRET, JWT_EXPIRY, SALT_ROUNDS } = process.env;
+const jwt = require('jsonwebtoken');
 
 async function getUserProfileById(id) {
     const query = `
@@ -35,18 +37,19 @@ async function createUser({ firstName, lastName, email, password, phone, gender,
     return rows[0];
 }
 
-async function createUserWithMetaAndToken({ 
-    firstName, 
-    lastName, 
-    email, 
-    password, 
-    phone, 
-    gender, 
-    dateOfBirth,
-    token,
+async function createUserWithMetaAndToken({
+    firstName,
+    lastName,
+    email,
+    password = null,
+    phone = '999-999-9999',
+    gender = 'other',
+    dateOfBirth = '2000-01-01',
     jwtExpiry,
-    deviceInfo,
-    ipAddress
+    deviceInfo = null,
+    ipAddress = null,
+    googleSubId = null,
+    isVerified = false
 }) {
     const client = await pgPool.connect();
 
@@ -68,13 +71,26 @@ async function createUserWithMetaAndToken({
         ]);
         const user = userResult.rows[0];
 
+        const token = jwt.sign(
+            {
+                id: user.id,
+                isVerified: isVerified,
+                email
+            },
+            JWT_SECRET,
+            {
+                expiresIn: JWT_EXPIRY
+            }
+        );
+
+
         // 2. Create user_meta
         const metaQuery = `
-            INSERT INTO user_meta (user_id, is_verified, is_deleted)
-            VALUES ($1, $2, $3)
+            INSERT INTO user_meta (user_id, google_sub_id, is_verified, is_deleted)
+            VALUES ($1, $2, $3, $4)
             RETURNING *
         `;
-        await client.query(metaQuery, [user.id, false, false]);
+        await client.query(metaQuery, [user.id, googleSubId, isVerified, false]);
 
         // 3. Create user token
         const tokenQuery = `
@@ -136,6 +152,7 @@ async function createUserWithMetaAndToken({
         // Optionally return all inserted IDs
         return {
             user,
+            token,
             masterSubscriptionId: masterSubId,
             cycleId,
             groupMappingId: mappingId
@@ -169,13 +186,14 @@ async function revokeUserTokens(userId, tokenType = 'access') {
     await pgQuery(query, [userId, tokenType]);
 }
 
-async function validateUserToken(token, userId) {
+async function validateUserToken(token, email) {
     const query = `
-        SELECT * FROM user_tokens 
-        WHERE token = $1 AND user_id = $2 AND is_revoked = false
+        SELECT * FROM user_tokens ut
+        JOIN users u ON ut.user_id = u.id
+        WHERE ut.token = $1 AND u.email = $2 AND is_revoked = false
         LIMIT 1
     `;
-    const { rows } = await pgQuery(query, [token, userId]);
+    const { rows } = await pgQuery(query, [token, email]);
     return rows[0] || null;
 }
 

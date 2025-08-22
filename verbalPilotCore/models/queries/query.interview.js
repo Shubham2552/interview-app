@@ -669,10 +669,11 @@ async function userInterviewCappingCheck(userId) {
             m.plan_id,
             p.display_name      AS plan_name,
             p.user_interview_capping as "userInterviewCapping",
+            p.has_answer_analysis as "hasAnswerAnalysis",
             c.id                AS "cycleId",
             c.cycle_start,
             c.cycle_end,
-            COUNT(ui.id)        AS "userCount",
+            COUNT(ui.id)        AS "usedCount",
             (p.user_interview_capping - COUNT(ui.id)) AS remaining_interviews
         FROM user_master_subscriptions m
         JOIN user_interview_plans p
@@ -688,7 +689,7 @@ async function userInterviewCappingCheck(userId) {
           AND CURRENT_DATE BETWEEN c.cycle_start AND c.cycle_end
         GROUP BY 
             m.id, m.user_id, m.plan_id, p.display_name, p.user_interview_capping, 
-            c.id, c.cycle_start, c.cycle_end;
+            c.id, c.cycle_start, c.cycle_end, p.has_answer_analysis;
     `;
   const { rows } = await pgQuery(query, [userId]);
   return rows[0] || null;
