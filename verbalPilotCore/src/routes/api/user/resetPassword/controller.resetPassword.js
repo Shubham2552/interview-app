@@ -8,7 +8,7 @@ const { logError } = require('../../../../utils/errorLogger');
 const handleResetPassword = async (id, newPassword) => {
     const context = { userId: id };
 
-    try { 
+    try {
         logger.info('Starting password reset process', { ...context });
 
         // Use query.user.js to get user profile
@@ -23,16 +23,14 @@ const handleResetPassword = async (id, newPassword) => {
 
         // Fetch the user's hashed password using query.user.js
         const userPassword = await getUserPasswordById(id);
-        if (!userPassword) {
-            logger.warn('Password reset failed: User password not found', { ...context });
-            return { Error: true, message: responseMessages.ERROR_CONSTANTS.USER_NOT_FOUND };
-        }
+        if (userPassword) {
 
-        const comparedPassword = await bcrypt.compare(newPassword, userPassword);
+            const comparedPassword = await bcrypt.compare(newPassword, userPassword);
 
-        if (comparedPassword) {
-            logger.warn('Password reset failed: New password same as old password', { ...context });
-            return { Error: true, message: responseMessages.ERROR_CONSTANTS.OLD_NEW_PASSWORD_SAME };
+            if (comparedPassword) {
+                logger.warn('Password reset failed: New password same as old password', { ...context });
+                return { Error: true, message: responseMessages.ERROR_CONSTANTS.OLD_NEW_PASSWORD_SAME };
+            }
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, parseInt(SALT_ROUNDS));
