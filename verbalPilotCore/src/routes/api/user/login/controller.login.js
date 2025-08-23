@@ -20,6 +20,12 @@ const handleLogin = async ({email, password, deviceInfo, ipAddress}) => {
             return { Error: true, message: responseMessages.ERROR_CONSTANTS.EMAIL_NOT_FOUND };
         }
       
+        if(existingUser.password === null) {
+            return {
+                Error: true,
+                message: 'Password is not set!! Use forgot password or social login!!'
+            }
+        }
         const isPasswordValid = await bcrypt.compare(password, existingUser.password);
 
         if (!isPasswordValid) {
